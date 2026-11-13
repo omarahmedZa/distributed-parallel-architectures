@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fundamentals — Distributed and Parallel Architectures</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<link rel="stylesheet" href="../assets/figures.css">
+<meta name="description" content="Prerequisite fundamentals for Distributed and Parallel Architectures: parallelism, memory models, cache hierarchy, MPI/OpenMP, and speedup/efficiency.">
+</head>
+<body data-lesson="000">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Fundamentals · Prerequisites</span>
+</nav>
+<header class="masthead">
+  <p class="kicker">Prerequisites module · taught first</p>
+  <h1>Fundamentals of Parallel and Distributed Computing</h1>
+  <p class="objective">Build the core vocabulary, models, and calculations needed for advanced distributed and parallel architectures: you can explain why and how systems exploit parallelism, contrast memory/programming models, reason about memory hierarchy effects, choose basic MPI vs OpenMP approaches, and compute speedup and efficiency.</p>
+</header>
+
+<h2>Why this module matters</h2>
+<p class="lede">Advanced architectural mechanisms only make sense against a few stable foundations: what parallelism buys and costs, how memory and communication shape performance, and how we measure improvement. This module teaches those prerequisites first and points forward to the lectures that depend on them.</p>
+<div class="callout"><span class="label">Forward connections</span>
+<p><strong>Cache &amp; memory hierarchy → <a href="002-advanced-memory-architectures-and-hierarchy.html">Lecture 2</a></strong> (coherence, NUMA, consistency). <strong>MPI &amp; OpenMP basics → <a href="005-advanced-message-passing-and-communication.html">Lecture 5</a></strong> (advanced message passing and communication mechanisms). <strong>Speedup &amp; efficiency → <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9</a></strong> (scaling laws, modeling, optimization). Memory models and parallelism also underpin Lectures 1, 3, 4, 6–8, and 10.</p></div>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Explain why parallelism is used, distinguish concurrency from parallelism, and apply Flynn’s taxonomy at a basic level.</li>
+  <li>Compare shared-memory and distributed-memory models, including programming implications and trade-offs.</li>
+  <li>Describe locality and the cache/memory hierarchy and give intuition for coherence/consistency challenges that motivate Lecture 2.</li>
+  <li>Describe core MPI and OpenMP concepts with minimal illustrative examples/pseudocode and justify when to use each.</li>
+  <li>Compute and interpret speedup, efficiency, cost, and overhead intuition as foundations for Lecture 9.</li>
+</ul>
+
+<h2>1. Introduction to parallel computing</h2>
+<h3>Why parallelism?</h3>
+<p>Single-core performance gains from higher clock frequency and deeper instruction-level tricks face physical limits: power density, heat, and diminishing returns from complexity. Parallel computing increases throughput and reduces time-to-solution by exploiting multiple processing elements simultaneously. The architectural question is never “parallelism or not?” in isolation—it is <em>which form</em> of parallelism, at what granularity, with what coordination and memory/communication costs.</p>
+<div class="numstrip" aria-label="Key ideas">
+  <div><b>Latency</b><span>time for one task/result</span></div>
+  <div><b>Throughput</b><span>tasks/results per unit time</span></div>
+  <div><b>Overhead</b><span>coordination, communication, imbalance</span></div>
+</div>
+
+<h3>Concurrency vs parallelism</h3>
+<p><strong>Concurrency</strong> is a structuring/property of a system: multiple tasks make progress in overlapping time periods (e.g. by interleaving on one core). <strong>Parallelism</strong> is simultaneous execution on multiple hardware units. A concurrent program may run on one core; a parallel program requires multiple execution resources. Real systems combine both: concurrent tasks may be scheduled in parallel, and parallel execution introduces concurrency-control challenges.</p>
+
+<h3>Flynn’s taxonomy (basic view)</h3>
+<p>Flynn classified architectures by instruction and data streams:</p>
+<table>
+  <tr><th>Class</th><th>Meaning</th><th>Typical intuition/examples</th></tr>
+  <tr><td><strong>SISD</strong></td><td>Single Instruction, Single Data</td><td>Classic uniprocessor scalar execution.</td></tr>
+  <tr><td><strong>SIMD</strong></td><td>Single Instruction, Multiple Data</td><td>Vector units, many GPU lanes executing same operation on different elements.</td></tr>
+  <tr><td><strong>MISD</strong></td><td>Multiple Instruction, Single Data</td><td>Rare in practice; sometimes discussed for fault-tolerant pipelines.</td></tr>
+  <tr><td><strong>MIMD</strong></td><td>Multiple Instruction, Multiple Data</td><td>Multicore CPUs, clusters, most general parallel/distributed systems.</td></tr>
+</table>
+<p class="note-muted">Modern systems are hybrids (e.g. MIMD across cores/nodes with SIMD within cores). This taxonomy is a starting lens, refined in <a href="001-advanced-parallel-architecture-design.html">Lecture 1</a>.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 220" role="img" aria-labelledby="f-flynn-t f-flynn-d">
+    <title id="f-flynn-t">Flynn’s taxonomy overview</title>
+    <desc id="f-flynn-d">Four quadrants showing SISD, SIMD, MISD, and MIMD as combinations of single/multiple instruction and data streams.</desc>
+    <rect x="20" y="20" width="350" height="85" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <rect x="390" y="20" width="350" height="85" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <rect x="20" y="115" width="350" height="85" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <rect x="390" y="115" width="350" height="85" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <text x="40" y="50" font-size="14" fill="var(--accent)">SISD</text><text x="40" y="75" font-size="12" fill="var(--ink-soft)">1 instruction stream · 1 data stream</text>
+    <text x="410" y="50" font-size="14" fill="var(--accent)">SIMD</text><text x="410" y="75" font-size="12" fill="var(--ink-soft)">1 instruction stream · many data elements</text>
+    <text x="40" y="145" font-size="14" fill="var(--accent)">MISD</text><text x="40" y="170" font-size="12" fill="var(--ink-soft)">many instruction streams · 1 data stream (rare)</text>
+    <text x="410" y="145" font-size="14" fill="var(--accent)">MIMD</text><text x="410" y="170" font-size="12" fill="var(--ink-soft)">many instruction streams · many data streams</text>
+  </svg>
+  <figcaption>Flynn’s taxonomy separates control (instructions) from data parallelism. Real architectures often combine categories.</figcaption>
+</figure>
+
+<h2>2. Shared-memory vs distributed-memory concepts</h2>
+<p>Memory model and address-space organization drive programming model, communication mechanisms, and scalability.</p>
+<div class="table-wrap"><table>
+  <tr><th>Aspect</th><th>Shared memory</th><th>Distributed memory</th></tr>
+  <tr><td>Address space</td><td>Logically common address space; threads/processes can access shared locations (subject to coherence/consistency rules).</td><td>Private address spaces per node/process; data sharing via explicit messages.</td></tr>
+  <tr><td>Communication</td><td>Implicit through loads/stores to shared data; synchronization primitives required.</td><td>Explicit send/receive/collectives; programmer/runtime manages data movement.</td></tr>
+  <tr><td>Programming implications</td><td>Often easier data sharing; must manage races, synchronization, and memory ordering.</td><td>Clear ownership/locality; must partition data and orchestrate communication.</td></tr>
+  <tr><td>Scalability trade-offs</td><td>Hardware coherence/interconnect contention can limit scaling; NUMA effects emerge.</td><td>Scales to many nodes; performance sensitive to latency, bandwidth, and communication/computation ratio.</td></tr>
+  <tr><td>Typical APIs/models</td><td>Threads, OpenMP, shared-memory abstractions.</td><td>MPI, PGAS variants, message-passing frameworks.</td></tr>
+</table></div>
+<div class="callout"><span class="label">Design trade-off</span><p>Shared memory optimizes programmability for fine-grained sharing but pushes complexity into coherence, synchronization, and contention. Distributed memory optimizes explicit locality and scaling but pushes complexity into decomposition and communication. Hybrid systems (shared-memory nodes in a distributed cluster) are the norm in HPC.</p></div>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 230" role="img" aria-labelledby="f-mem-t f-mem-d">
+    <title id="f-mem-t">Shared vs distributed memory</title>
+    <desc id="f-mem-d">Left: multiple cores connected to a shared memory. Right: multiple nodes each with private memory connected by a network.</desc>
+    <text x="120" y="25" font-size="13" fill="var(--ink)">Shared memory</text>
+    <rect x="30" y="40" width="70" height="40" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="48" y="65" font-size="12">Core</text>
+    <rect x="110" y="40" width="70" height="40" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="128" y="65" font-size="12">Core</text>
+    <rect x="190" y="40" width="70" height="40" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="208" y="65" font-size="12">Core</text>
+    <rect x="70" y="120" width="150" height="55" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="100" y="153" font-size="12" fill="var(--ink)">Shared Memory</text>
+    <line x1="65" y1="80" x2="110" y2="120" stroke="var(--ink-faint)"/><line x1="145" y1="80" x2="145" y2="120" stroke="var(--ink-faint)"/><line x1="225" y1="80" x2="180" y2="120" stroke="var(--ink-faint)"/>
+
+    <text x="480" y="25" font-size="13" fill="var(--ink)">Distributed memory</text>
+    <rect x="360" y="40" width="110" height="70" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="380" y="65" font-size="12">Node A</text><text x="380" y="90" font-size="11" fill="var(--ink-soft)">Private Mem</text>
+    <rect x="500" y="40" width="110" height="70" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="520" y="65" font-size="12">Node B</text><text x="520" y="90" font-size="11" fill="var(--ink-soft)">Private Mem</text>
+    <rect x="640" y="40" width="100" height="70" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="660" y="65" font-size="12">Node C</text><text x="660" y="90" font-size="11" fill="var(--ink-soft)">Private Mem</text>
+    <rect x="420" y="150" width="250" height="35" rx="6" fill="var(--code-bg)" stroke="var(--rule)"/><text x="490" y="173" font-size="12">Interconnect / Network</text>
+    <line x1="415" y1="110" x2="470" y2="150" stroke="var(--ink-faint)"/><line x1="555" y1="110" x2="545" y2="150" stroke="var(--ink-faint)"/><line x1="690" y1="110" x2="620" y2="150" stroke="var(--ink-faint)"/>
+  </svg>
+  <figcaption>Shared memory communicates implicitly via shared state; distributed memory communicates explicitly over a network. Hybrid designs combine both.</figcaption>
+</figure>
+
+<h2>3. Basic cache and memory hierarchy</h2>
+<p><strong>Forward link:</strong> this section provides intuition used in <a href="002-advanced-memory-architectures-and-hierarchy.html">Lecture 2 (Advanced Memory Architectures and Memory Hierarchy)</a>.</p>
+<h3>Locality and hierarchy levels</h3>
+<p>Processors are fast; large memory is comparatively slow. Systems bridge this gap with a <strong>memory hierarchy</strong>: small/fast levels close to the core (registers, L1/L2/L3 caches) backed by larger/slower levels (DRAM, remote memory, storage). Performance depends on <strong>locality</strong>:</p>
+<ul>
+  <li><strong>Temporal locality:</strong> recently accessed data is likely reused soon.</li>
+  <li><strong>Spatial locality:</strong> data near recently accessed addresses is likely accessed soon (cache lines/blocks).</li>
+</ul>
+<div class="keybox"><span class="sym">Goal: keep working set in the fastest level that can hold it</span><p>High cache hit rates hide latency; misses expose memory/interconnect costs and can dominate runtime in bandwidth- or latency-bound kernels.</p></div>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 300" role="img" aria-labelledby="f-hier-t f-hier-d">
+    <title id="f-hier-t">Memory hierarchy pyramid</title>
+    <desc id="f-hier-d">Pyramid from registers and L1 at top to DRAM and remote/storage at bottom, labeled faster/smaller vs larger/slower.</desc>
+    <polygon points="360,20 430,80 290,80" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <polygon points="290,80 430,80 470,130 250,130" fill="var(--card)" stroke="var(--rule)"/>
+    <polygon points="250,130 470,130 520,185 200,185" fill="var(--card)" stroke="var(--rule)"/>
+    <polygon points="200,185 520,185 580,245 140,245" fill="var(--card)" stroke="var(--rule)"/>
+    <polygon points="140,245 580,245 620,290 100,290" fill="var(--card)" stroke="var(--rule)"/>
+    <text x="360" y="60" text-anchor="middle" font-size="12">Registers</text>
+    <text x="360" y="112" text-anchor="middle" font-size="12">L1 / L2 Cache</text>
+    <text x="360" y="165" text-anchor="middle" font-size="12">L3 / LLC</text>
+    <text x="360" y="222" text-anchor="middle" font-size="12">Main Memory (DRAM)</text>
+    <text x="360" y="275" text-anchor="middle" font-size="12">Remote / NUMA / Storage tiers</text>
+    <text x="40" y="60" font-size="11" fill="var(--ok)">Faster, smaller</text>
+    <text x="40" y="280" font-size="11" fill="var(--warn)">Larger, slower</text>
+  </svg>
+  <figcaption>Each level trades capacity for speed. Effective performance depends on reuse/locality and on how data moves across levels.</figcaption>
+</figure>
+
+<h3>Coherence and consistency intuition (lead-in)</h3>
+<p>When multiple cores cache copies of shared data, updates create correctness questions:</p>
+<ul>
+  <li><strong>Cache coherence:</strong> ensures a coherent view of a single memory location (e.g. writes become visible so cores do not indefinitely read stale copies) via protocols such as MSI/MESI/MOESI—detailed in Lecture 2.</li>
+  <li><strong>Memory consistency:</strong> defines ordering guarantees for operations across different locations (what reorderings are allowed/observed), affecting synchronization and reasoning about parallel programs.</li>
+</ul>
+<p>These mechanisms add hardware complexity and traffic (invalidations, directory lookups), creating scalability trade-offs explored in <a href="002-advanced-memory-architectures-and-hierarchy.html">Lecture 2</a>.</p>
+
+<h2>4. Basic MPI and OpenMP programming</h2>
+<p><strong>Forward link:</strong> core concepts here are extended in <a href="005-advanced-message-passing-and-communication.html">Lecture 5 (Advanced Message Passing and Communication Mechanisms)</a>.</p>
+<h3>OpenMP (shared-memory parallelism)</h3>
+<p><strong>OpenMP</strong> is a directive-based model for shared-memory systems (threads within a process/address space). It is well-suited to loop/data parallelism and incremental parallelization when data can be shared safely.</p>
+<ul>
+  <li><strong>Core concepts:</strong> parallel regions, teams of threads, work sharing (<code>#pragma omp parallel for</code>), synchronization (barriers, critical/atomic), data scoping (shared/private).</li>
+  <li><strong>Trade-offs:</strong> convenient for multicore nodes; requires care for races, false sharing, and NUMA locality.</li>
+</ul>
+<pre><code>// Minimal illustrative OpenMP (C/C++ pseudocode)
+#pragma omp parallel for
+for (int i = 0; i &lt; N; i++) {
+    a[i] = b[i] + c[i];
+}</code></pre>
+
+<h3>MPI (distributed-memory message passing)</h3>
+<p><strong>MPI</strong> (Message Passing Interface) is the standard model for distributed-memory parallelism: processes with separate address spaces communicate explicitly.</p>
+<ul>
+  <li><strong>Core concepts:</strong> processes/ranks, communicators, point-to-point send/receive, collectives (broadcast, reduce, gather/scatter), synchronization implied by communication patterns.</li>
+  <li><strong>Trade-offs:</strong> explicit control and scalability across nodes; requires data partitioning and attention to communication overhead/latency.</li>
+</ul>
+<pre><code>// Minimal illustrative MPI (pseudocode)
+MPI_Init(...);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+if (rank == 0) {
+    MPI_Send(buf, count, type, 1, tag, MPI_COMM_WORLD);
+} else if (rank == 1) {
+    MPI_Recv(buf, count, type, 0, tag, MPI_COMM_WORLD, &status);
+}
+
+MPI_Finalize();</code></pre>
+
+<h3>When to use each (basic guidance)</h3>
+<table>
+  <tr><th>Choose</th><th>Good fit</th><th>Watch for</th></tr>
+  <tr><td><strong>OpenMP</strong></td><td>Shared-memory node, loop/data parallelism, quick parallel speedups on multicore.</td><td>Data races, synchronization overhead, memory bandwidth/NUMA effects.</td></tr>
+  <tr><td><strong>MPI</strong></td><td>Distributed nodes/clusters, explicit partitioning, scalable multi-node execution.</td><td>Communication latency/bandwidth, decomposition/collective costs.</td></tr>
+  <tr><td><strong>Hybrid MPI+OpenMP</strong></td><td>Clusters of multicore nodes (common in HPC).</td><td>Combined complexity; balance threads vs ranks and placement.</td></tr>
+</table>
+
+<h2>5. Basic speedup and efficiency calculations</h2>
+<p><strong>Forward link:</strong> these fundamentals are deepened in <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9 (Performance Modeling, Scalability and Optimization)</a>.</p>
+<h3>Definitions</h3>
+<ul>
+  <li><strong>Parallel time</strong> <code>T(p)</code>: time with <code>p</code> processors/resources.</li>
+  <li><strong>Speedup</strong> <code>S(p) = T(1) / T(p)</code>: how much faster than the baseline.</li>
+  <li><strong>Efficiency</strong> <code>E(p) = S(p) / p = T(1) / (p · T(p))</code>: fraction of resources usefully employed (0 &lt; E ≤ 1 ideally, but overheads reduce it).</li>
+  <li><strong>Cost</strong> <code>C(p) = p · T(p)</code>: processor-time product. Cost-optimal if <code>C(p)</code> is on the order of <code>T(1)</code>.</li>
+  <li><strong>Overhead intuition</strong> <code>T_o = p·T(p) - T(1)</code>: extra work/time from communication, synchronization, idle time/imbalance, and redundant computation.</li>
+</ul>
+
+<h3>Worked example 1 — speedup and efficiency</h3>
+<p>A kernel takes <code>T(1)=100 s</code> serially and <code>T(8)=20 s</code> on 8 cores.</p>
+<table>
+  <tr><th>Quantity</th><th>Calculation</th><th>Result</th></tr>
+  <tr><td>Speedup <code>S(8)</code></td><td class="num">100 / 20</td><td class="num"><strong>5×</strong></td></tr>
+  <tr><td>Efficiency <code>E(8)</code></td><td class="num">5 / 8</td><td class="num"><strong>0.625 (62.5%)</strong></td></tr>
+  <tr><td>Cost <code>C(8)</code></td><td class="num">8 × 20</td><td class="num"><strong>160 processor-seconds</strong></td></tr>
+  <tr><td>Overhead <code>T_o</code></td><td class="num">160 − 100</td><td class="num"><strong>60 processor-seconds</strong></td></tr>
+</table>
+<p><strong>Interpretation:</strong> useful speedup exists, but 37.5% of the available core-time is lost to overheads/imbalance/communication or limited parallel fraction.</p>
+
+<h3>Worked example 2 — effect of overhead</h3>
+<p>Suppose ideal parallel work would give <code>T(4)=25 s</code> for <code>T(1)=100 s</code>, but communication/synchronization adds 10 s: <code>T(4)=35 s</code>.</p>
+<ul>
+  <li><code>S(4)=100/35 ≈ 2.86×</code> (not 4×), <code>E(4)≈0.714</code>.</li>
+  <li>Reducing overhead or improving overlap can recover performance—an architectural and algorithmic design concern (see Lectures 3, 5, 8, 9).</li>
+</ul>
+
+<div class="callout"><span class="label">Fundamental HPC concepts</span><p>Performance depends on the balance of computation, memory bandwidth/latency, and communication; on parallel fraction and overheads; and on scalability (how performance changes with problem size and resources). Strong/weak scaling, Amdahl’s and Gustafson’s laws, and communication-to-computation ratio are formalized in <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9</a>.</p></div>
+
+<h2>Recap and check for understanding</h2>
+<ul>
+  <li>Parallelism exploits multiple resources to improve time/throughput but introduces coordination, communication, and imbalance costs.</li>
+  <li>Shared vs distributed memory trade programmability/sharing against explicit communication and scaling behavior; hybrids dominate practice.</li>
+  <li>Locality and the memory hierarchy determine effective latency/bandwidth; coherence/consistency become central under sharing (Lecture 2).</li>
+  <li>OpenMP targets shared-memory parallelism; MPI targets distributed-memory message passing (Lecture 5 deepens communication mechanisms).</li>
+  <li>Speedup, efficiency, cost, and overhead quantify benefit and loss (Lecture 9 generalizes to scaling laws and modeling).</li>
+</ul>
+<ol class="quiz">
+  <li>If <code>T(1)=120 s</code> and <code>T(6)=30 s</code>, what are speedup and efficiency?
+    <details><summary>Show answer</summary><p><code>S(6)=120/30=4×</code>, <code>E(6)=4/6≈0.667 (66.7%)</code>.</p></details>
+  </li>
+  <li>Give one reason to prefer MPI over OpenMP, and one architectural cost that may limit MPI scaling.
+    <details><summary>Show answer</summary><p>Prefer MPI for distributed nodes/private address spaces and explicit multi-node scaling. Scaling may be limited by network latency/bandwidth, synchronization, or communication-to-computation imbalance.</p></details>
+  </li>
+  <li>Why does cache locality matter before studying coherence protocols in Lecture 2?
+    <details><summary>Show answer</summary><p>Hierarchy/locality explains why caches exist and when accesses hit/miss; coherence protocols are needed because multiple caches may hold copies of shared data, creating correctness and traffic trade-offs.</p></details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next:</strong> proceed to <a href="001-advanced-parallel-architecture-design.html">Lecture 1 — Advanced Parallel Architecture Design</a>, building on these models and trade-offs.</p>
+  <div class="pager">
+    <a href="../index.html">← Course map</a>
+    <a href="001-advanced-parallel-architecture-design.html">Next · Lecture 1</a>
+  </div>
+</div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body>
+</html>

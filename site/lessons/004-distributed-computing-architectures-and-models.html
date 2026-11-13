@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 4 — Distributed Computing Architectures and Models</title>
+<link rel="stylesheet" href="../assets/lesson.css"><link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="004"><main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 2 · Lecture 4</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 2 – Distributed Systems Architecture</p>
+  <h1>Lecture 4 — Distributed Computing Architectures and Models</h1>
+  <p class="objective">Compare distributed system architectures and models—client-server, peer-to-peer, cluster, and grid computing—and reason about distributed memory models and their design trade-offs.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Distributed architectures determine how computation, data, and control are placed across independent nodes. The right model improves scalability, availability, and cost-efficiency; the wrong one amplifies coordination, failure, and performance problems.</p>
+<p><strong>Prerequisites:</strong> <a href="000-fundamentals.html">Fundamentals</a> (shared vs distributed memory, communication basics).</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Characterize core distributed system architectural styles and their assumptions.</li>
+  <li>Compare client-server and peer-to-peer models.</li>
+  <li>Differentiate cluster and grid computing in resources, management, and use cases.</li>
+  <li>Explain distributed memory models and implications for programming and performance.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Distributed system architectures</h3>
+<p>A distributed system comprises multiple autonomous nodes communicating over a network to provide a coherent service. Key architectural concerns include decomposition (services/components), communication (synchronous/asynchronous, RPC, messaging), state placement/replication, coordination, and failure handling. No single global clock or shared memory is assumed by default (see Lecture 6).</p>
+
+<h3>Client-server</h3>
+<p><strong>Client-server</strong> separates requesters (clients) from providers (servers). Servers centralize resources/services; clients initiate interactions.</p>
+<ul>
+  <li><strong>Advantages:</strong> clear roles, centralized control/security/policy, simpler consistency/management for shared state.</li>
+  <li><strong>Limitations:</strong> server bottlenecks, single points of failure (without replication), scaling often requires careful partitioning/caching/load balancing.</li>
+</ul>
+
+<h3>Peer-to-peer (P2P)</h3>
+<p><strong>P2P</strong> systems distribute roles among peers that can act as both clients and servers, often with decentralized resource sharing and lookup.</p>
+<ul>
+  <li><strong>Advantages:</strong> resource aggregation, potential fault tolerance and scalability via decentralization, reduced central bottlenecks.</li>
+  <li><strong>Limitations:</strong> complex discovery/routing, consistency and trust/security challenges, variable availability (churn).</li>
+</ul>
+
+<h3>Cluster computing</h3>
+<p>A <strong>cluster</strong> is a collection of tightly coupled, usually homogeneous nodes on a high-speed LAN, managed as a single system for performance/availability (e.g. HPC clusters, HA clusters). Resources are typically owned/administered within one organization with coordinated scheduling.</p>
+
+<h3>Grid computing</h3>
+<p><strong>Grid computing</strong> federates geographically distributed, often heterogeneous resources across administrative domains to form virtual organizations. It emphasizes sharing, resource discovery, and cross-domain policies, typically over wider-area networks with higher heterogeneity/latency.</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Model</th><th>Coupling/ownership</th><th>Typical strengths</th><th>Typical challenges</th></tr>
+  <tr><td>Client-server</td><td>Logical centralization of service</td><td>Manageability, control</td><td>Bottlenecks, failover complexity</td></tr>
+  <tr><td>P2P</td><td>Decentralized peers</td><td>Scalability via aggregation, resilience potential</td><td>Coordination, consistency, churn/security</td></tr>
+  <tr><td>Cluster</td><td>Tight, single-admin, fast LAN</td><td>High performance, predictable environment</td><td>Cost, scale limits of one site</td></tr>
+  <tr><td>Grid</td><td>Loose, multi-admin, WAN</td><td>Resource federation, breadth</td><td>Heterogeneity, latency, policy/trust, scheduling</td></tr>
+</table></div>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 240" role="img" aria-labelledby="f-ds-t f-ds-d">
+    <title id="f-ds-t">Client-server vs peer-to-peer</title>
+    <desc id="f-ds-d">Left: multiple clients connected to a central server. Right: peers connected to each other without a single center.</desc>
+    <text x="120" y="25" font-size="13">Client-server</text>
+    <rect x="130" y="45" width="90" height="40" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="150" y="70" font-size="12">Server</text>
+    <rect x="30" y="130" width="70" height="30" rx="5" fill="var(--card)" stroke="var(--rule)"/><text x="43" y="150" font-size="11">Client</text>
+    <rect x="120" y="130" width="70" height="30" rx="5" fill="var(--card)" stroke="var(--rule)"/><text x="133" y="150" font-size="11">Client</text>
+    <rect x="210" y="130" width="70" height="30" rx="5" fill="var(--card)" stroke="var(--rule)"/><text x="223" y="150" font-size="11">Client</text>
+    <line x1="65" y1="130" x2="150" y2="85" stroke="var(--ink-faint)"/><line x1="155" y1="130" x2="175" y2="85" stroke="var(--ink-faint)"/><line x1="245" y1="130" x2="200" y2="85" stroke="var(--ink-faint)"/>
+
+    <text x="520" y="25" font-size="13">Peer-to-peer</text>
+    <g fill="var(--card)" stroke="var(--rule)">
+      <circle cx="500" cy="70" r="22"/><text x="486" y="74" font-size="10">Peer</text>
+      <circle cx="610" cy="60" r="22"/><text x="596" y="64" font-size="10">Peer</text>
+      <circle cx="690" cy="110" r="22"/><text x="676" y="114" font-size="10">Peer</text>
+      <circle cx="560" cy="150" r="22"/><text x="546" y="154" font-size="10">Peer</text>
+      <circle cx="450" cy="140" r="22"/><text x="436" y="144" font-size="10">Peer</text>
+    </g>
+    <g stroke="var(--ink-faint)">
+      <line x1="520" y1="78" x2="590" y2="66"/><line x1="628" y1="72" x2="672" y2="98"/><line x1="672" y1="122" x2="580" y2="142"/><line x1="540" y1="145" x2="470" y2="142"/><line x1="468" y1="122" x2="492" y2="88"/><line x1="520" y1="82" x2="548" y2="132"/><line x1="592" y1="78" x2="570" y2="130"/>
+    </g>
+  </svg>
+  <figcaption>Centralized coordination simplifies control but concentrates load; decentralization distributes roles but complicates coordination and consistency.</figcaption>
+</figure>
+
+<h3>Distributed memory models</h3>
+<p>In distributed memory models, each process/node accesses local memory directly and exchanges data via messages (explicit) or higher-level abstractions (e.g. PGAS providing a global address view over partitioned memory). Implications: programmers reason about data distribution, locality, and communication; performance depends on minimizing and overlapping communication (see <a href="000-fundamentals.html">Fundamentals</a>, <a href="005-advanced-message-passing-and-communication.html">Lecture 5</a>).</p>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<ul>
+  <li><strong>Centralization vs decentralization:</strong> simplicity/control vs scalability/fault isolation.</li>
+  <li><strong>Consistency vs availability/latency:</strong> stronger coordination eases correctness but costs performance/availability under partitions (context for Lecture 6).</li>
+  <li><strong>Coupling and heterogeneity:</strong> clusters offer predictability; grids/clouds offer flexibility at the cost of variability and management complexity.</li>
+  <li><strong>State placement:</strong> replication improves availability/read scaling but complicates updates/consistency.</li>
+</ul>
+
+<h2>Limitations and scalability</h2>
+<ul>
+  <li>Network latency/bandwidth and partial failures constrain coordination.</li>
+  <li>Heterogeneity and churn complicate scheduling and correctness.</li>
+  <li>Security and trust boundaries are first-class in multi-domain systems.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Scalable coordination and consistency under geo-distribution and failures.</li>
+  <li>Resource management across heterogeneous, federated infrastructures.</li>
+  <li>Programming models that balance productivity, locality control, and portability.</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ol class="quiz">
+  <li>Give one advantage and one limitation of P2P compared to client-server.
+    <details><summary>Show answer</summary><p>Advantage: decentralization can improve scalability/resource aggregation and reduce single bottlenecks. Limitation: harder discovery, coordination, consistency, and handling churn/security.</p></details>
+  </li>
+  <li>How do clusters and grids typically differ in administration and environment?
+    <details><summary>Show answer</summary><p>Clusters are usually single-admin, tightly coupled, and relatively homogeneous on fast LANs; grids federate heterogeneous resources across administrative domains over wider-area networks.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> I. Stoica, R. Morris, D. Karger, M. F. Kaashoek, and H. Balakrishnan, “Chord: A Scalable Peer-to-peer Lookup Service for Internet Applications,” in <em>Proc. ACM SIGCOMM</em>, 2001, pp. 149–160. DOI: <a href="https://doi.org/10.1145/383059.383071">10.1145/383059.383071</a>.</p>
+    <p><strong>Core contribution:</strong> Introduces Chord, a distributed lookup protocol that efficiently maps keys to nodes in dynamic P2P systems.</p>
+    <p><strong>Method/architecture:</strong> Uses consistent hashing and a structured overlay (finger tables) so each node maintains limited state and lookups resolve in logarithmic hops with respect to the number of nodes.</p>
+    <p><strong>Key results:</strong> Demonstrates scalable, decentralized lookup with provable efficiency and robustness properties under node joins/leaves (within model assumptions).</p>
+    <p><strong>Limitations:</strong> Performance and correctness depend on overlay maintenance under churn; real deployments face latency variability, security/Sybil issues, and application-level consistency concerns.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> I. Foster, C. Kesselman, and S. Tuecke, “The Anatomy of the Grid: Enabling Scalable Virtual Organizations,” <em>Int’l Journal of High Performance Computing Applications</em>, vol. 15, no. 3, pp. 200–222, 2001. DOI: <a href="https://doi.org/10.1177/109434200101500302">10.1177/109434200101500302</a>.</p>
+    <p><strong>Core contribution:</strong> Defines grid architecture principles centered on sharing resources across dynamic, multi-institutional virtual organizations with interoperable protocols.</p>
+    <p><strong>Method/architecture:</strong> Articulates a layered hourglass-style architecture and requirements for resource sharing, security, and coordinated services across administrative domains.</p>
+    <p><strong>Key results:</strong> Provides a conceptual and architectural foundation for grid middleware and federated resource management in distributed scientific computing.</p>
+    <p><strong>Limitations:</strong> Cross-domain heterogeneity, policy, and performance variability complicate deployment; later cloud models addressed some operational issues with different trade-offs (centralized providers, virtualization).</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Cluster computing vs Grid computing</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Cluster computing</th><th>Grid computing</th></tr>
+      <tr><td>Resource ownership</td><td>Single administrative domain</td><td>Federated across multiple domains/organizations</td></tr>
+      <tr><td>Homogeneity &amp; network</td><td>Often homogeneous, high-speed LAN</td><td>Heterogeneous resources, often WAN-connected</td></tr>
+      <tr><td>Advantages</td><td>Predictable performance, simpler management/scheduling</td><td>Large-scale resource sharing and aggregation across sites</td></tr>
+      <tr><td>Limitations</td><td>Bounded by site resources/cost</td><td>Heterogeneity, latency, security/policy and scheduling complexity</td></tr>
+      <tr><td>Suitable use cases</td><td>Dedicated HPC/enterprise workloads within one organization</td><td>Collaborative, distributed science and cross-organization resource pooling</td></tr>
+    </table></div>
+  </section>
+  <section class="case-study">
+    <h3>Case study — SETI@home (volunteer distributed computing)</h3>
+    <p><strong>What it is:</strong> SETI@home was a large-scale volunteer computing project that distributed radio-signal analysis workloads to millions of participant machines over the Internet.</p>
+    <p><strong>Architectural design:</strong> A centralized coordination/server infrastructure partitioned work units, distributed them to heterogeneous clients, and collected/validated results, leveraging otherwise idle consumer resources (a master–worker style at Internet scale).</p>
+    <p><strong>How it addresses lecture challenges:</strong> Demonstrated massive aggregate throughput by exploiting distributed, loosely coupled resources and tolerating heterogeneity and intermittent availability through task granularity and redundancy/validation strategies.</p>
+    <p><strong>Observed strengths/limitations:</strong> Achieved extraordinary scale and cost efficiency for embarrassingly parallel analysis; limitations included reliance on central coordination, variable/untrusted clients, limited suitability for tightly coupled communication, and challenges in verification and scheduling.</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="003-interconnection-networks-and-communication.html">← Lecture 3</a><a href="005-advanced-message-passing-and-communication.html">Next · Lecture 5</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body></html>

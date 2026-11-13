@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 8 — Load Balancing and Dynamic Resource Scheduling</title>
+<link rel="stylesheet" href="../assets/lesson.css"><link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="008"><main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 3 · Lecture 8</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 3 – Advanced Parallel Processing and Optimization</p>
+  <h1>Lecture 8 — Load Balancing and Dynamic Resource Scheduling</h1>
+  <p class="objective">Compare static and dynamic load balancing, task scheduling, work stealing, and resource allocation strategies, and evaluate their impact on performance and scalability in distributed environments.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Parallel speedup is limited by the slowest participant. Load imbalance and poor scheduling waste resources and amplify synchronization/communication delays; effective balancing and scheduling are essential for scalable performance.</p>
+<p><strong>Prerequisites:</strong> <a href="000-fundamentals.html">Fundamentals</a> (speedup/efficiency), <a href="007-advanced-parallel-algorithms-and-decomposition.html">Lecture 7</a> (decomposition/irregularity).</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Differentiate static and dynamic load balancing approaches.</li>
+  <li>Explain task scheduling models and work stealing.</li>
+  <li>Analyze resource allocation and scheduling strategies in distributed environments.</li>
+  <li>Assess trade-offs among overhead, balance quality, locality, and scalability.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Static load balancing</h3>
+<p><strong>Static balancing</strong> assigns work before execution based on known costs/structure (e.g. block/cyclic distributions, precomputed partitions). It has low runtime overhead and can preserve locality, but performs poorly when workloads are unpredictable, irregular, or time-varying.</p>
+
+<h3>Dynamic load balancing</h3>
+<p><strong>Dynamic balancing</strong> adjusts assignments at runtime in response to observed load/imbalance. Strategies include centralized managers (simple global view but bottleneck) and distributed/hierarchical schemes (scalable but more complex). It handles irregularity and variability at the cost of monitoring, migration, and coordination overhead.</p>
+
+<h3>Task scheduling and work stealing</h3>
+<p>Task schedulers map runnable tasks to workers considering dependencies, priorities, and locality. <strong>Work stealing</strong> is a distributed dynamic strategy: each worker maintains a local deque of tasks; idle workers (“thieves”) steal tasks from others (“victims”). This provides automatic load balancing with good locality (workers execute their own tasks first) and provably good behavior for well-structured parallel computations.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 230" role="img" aria-labelledby="f-ws-t f-ws-d">
+    <title id="f-ws-t">Work stealing concept</title>
+    <desc id="f-ws-d">Three workers with task queues; an idle worker steals a task from a busy worker.</desc>
+    <rect x="60" y="50" width="170" height="120" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <rect x="295" y="50" width="170" height="120" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <rect x="530" y="50" width="170" height="120" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+    <text x="110" y="75" font-size="12">Worker 1 (busy)</text><text x="345" y="75" font-size="12">Worker 2</text><text x="560" y="75" font-size="12">Worker 3 (idle)</text>
+    <rect x="80" y="95" width="35" height="22" fill="var(--accent-soft)" stroke="var(--accent)"/><rect x="120" y="95" width="35" height="22" fill="var(--accent-soft)" stroke="var(--accent)"/><rect x="160" y="95" width="35" height="22" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <rect x="315" y="95" width="35" height="22" fill="var(--card)" stroke="var(--rule)"/><rect x="355" y="95" width="35" height="22" fill="var(--card)" stroke="var(--rule)"/>
+    <text x="585" y="112" font-size="11" fill="var(--ink-soft)">empty</text>
+    <path d="M 560 120 C 450 170, 320 170, 200 120" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+    <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--accent)"/></marker></defs>
+    <text x="330" y="185" font-size="11" fill="var(--ink-soft)">idle worker steals task to restore balance</text>
+  </svg>
+  <figcaption>Work stealing balances load dynamically while favoring local execution; stealing incurs synchronization/communication overhead.</figcaption>
+</figure>
+
+<h3>Resource allocation and scheduling in distributed environments</h3>
+<p>Distributed schedulers allocate CPU, memory, bandwidth, accelerators, and nodes to jobs/tasks across clusters or federated systems. Policies consider fairness, priority, deadlines/QoS, data locality, and utilization. Architectures range from centralized (e.g. classic cluster managers) to two-level/hierarchical and fully decentralized designs to improve scalability and resilience.</p>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<div class="table-wrap"><table>
+  <tr><th>Strategy</th><th>Advantages</th><th>Limitations / trade-offs</th></tr>
+  <tr><td>Static balancing</td><td>Low runtime overhead, predictable, locality-friendly</td><td>Poor under irregular/variable loads</td></tr>
+  <tr><td>Centralized dynamic</td><td>Global view, potentially high-quality decisions</td><td>Scalability bottleneck, single point of failure/latency</td></tr>
+  <tr><td>Distributed/hierarchical dynamic</td><td>Scalable, resilient</td><td>Partial information, coordination complexity, possible suboptimality</td></tr>
+  <tr><td>Work stealing</td><td>Adaptive, good locality, efficient for task parallelism</td><td>Steal overhead/contention, locality loss for stolen tasks, tuning needed</td></tr>
+</table></div>
+
+<h3>Worked example: imbalance impact on speedup</h3>
+<p>With <code>p=4</code> workers and total parallel work equivalent to 100 time units evenly divided, ideal <code>T=25</code>. If dynamic imbalance leaves workers finishing at 20, 20, 25, 35, then <code>T(p)=35</code> (the straggler dominates), giving <code>S=100/35≈2.86×</code> and <code>E≈71.4%</code> instead of 4×/100%. Reducing imbalance (better decomposition, dynamic balancing, or stealing) directly improves efficiency.</p>
+
+<h2>Limitations and scalability</h2>
+<ul>
+  <li>Balancing overhead (migration, synchronization, metadata) can outweigh benefits for fine-grained tasks.</li>
+  <li>Locality-aware balancing is harder: moving work may move or invalidate data.</li>
+  <li>Distributed environments add heterogeneity, failures, and variable communication costs.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Scalable, locality- and heterogeneity-aware scheduling for exascale and cloud-edge systems.</li>
+  <li>Online learning/adaptive policies for unpredictable workloads.</li>
+  <li>Co-scheduling compute, data movement, and accelerators/energy constraints.</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ol class="quiz">
+  <li>Why can static load balancing fail on irregular graph workloads?
+    <details><summary>Show answer</summary><p>Work per partition may vary unpredictably (e.g. skewed degrees), so preassigned loads become unbalanced at runtime.</p></details>
+  </li>
+  <li>What is a key advantage of work stealing over centralized dynamic balancing?
+    <details><summary>Show answer</summary><p>It distributes balancing decisions among workers, avoiding a single scheduler bottleneck and scaling better while preserving local-task locality.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> R. D. Blumofe and C. E. Leiserson, “Scheduling Multithreaded Computations by Work Stealing,” <em>Journal of the ACM</em>, vol. 46, no. 5, pp. 720–748, Sep. 1999. DOI: <a href="https://doi.org/10.1145/324133.324234">10.1145/324133.324234</a>.</p>
+    <p><strong>Core contribution:</strong> Provides a randomized work-stealing scheduling algorithm and theoretical analysis for executing multithreaded computations efficiently.</p>
+    <p><strong>Method/architecture:</strong> Models parallel computations and analyzes time/space/communication bounds when idle processors steal tasks from others’ deques.</p>
+    <p><strong>Key results:</strong> Shows work stealing achieves expected time close to optimal and good space/communication bounds, establishing it as a foundational scheduling strategy.</p>
+    <p><strong>Limitations:</strong> Guarantees rely on model assumptions; practical performance depends on task granularity, memory hierarchy/locality, and implementation overheads in real systems.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> M. Isard, V. Prabhakaran, J. Currey, U. Wieder, K. Talwar, and A. Goldberg, “Quincy: Fair Scheduling for Distributed Computing Clusters,” in <em>Proc. ACM SOSP</em>, 2009, pp. 261–276. DOI: <a href="https://doi.org/10.1145/1629575.1629601">10.1145/1629575.1629601</a>.</p>
+    <p><strong>Core contribution:</strong> Proposes a cluster scheduling framework that balances fairness and data/computation locality using a flow-based optimization approach.</p>
+    <p><strong>Method/architecture:</strong> Models scheduling decisions as a min-cost flow problem over tasks, nodes, and data locations to compute assignments efficiently.</p>
+    <p><strong>Key results:</strong> Demonstrates improved locality and fairness trade-offs compared to simpler queue-based schedulers in distributed data-processing clusters.</p>
+    <p><strong>Limitations:</strong> Centralized/global optimization can face scalability and responsiveness challenges at very large or highly dynamic scales; assumptions may not capture all workload heterogeneity.</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Static vs Dynamic load balancing</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Static load balancing</th><th>Dynamic load balancing</th></tr>
+      <tr><td>Decision time</td><td>Before execution</td><td>During execution</td></tr>
+      <tr><td>Advantages</td><td>Low runtime overhead, predictable mapping, good locality</td><td>Adapts to irregular/variable workloads and runtime conditions</td></tr>
+      <tr><td>Limitations</td><td>Sensitive to misestimation and variability</td><td>Monitoring/migration/synchronization overhead; complexity</td></tr>
+      <tr><td>Suitable use cases</td><td>Regular, well-characterized workloads</td><td>Irregular, adaptive, or unpredictable workloads</td></tr>
+    </table></div>
+  </section>
+  <section class="case-study">
+    <h3>Case study — Cilk runtime (work-stealing scheduler)</h3>
+    <p><strong>What it is:</strong> Cilk is a parallel programming language/runtime (originating at MIT) that uses work stealing to schedule fine-grained tasks on shared-memory multicore systems.</p>
+    <p><strong>Architectural design:</strong> Programmers express parallelism (e.g. spawn/sync constructs) while the runtime maintains per-worker deques and performs steals when workers become idle, balancing load dynamically.</p>
+    <p><strong>How it addresses lecture challenges:</strong> Provides scalable dynamic load balancing with good locality and low overhead for many divide-and-conquer/task-parallel workloads, reducing programmer burden for scheduling.</p>
+    <p><strong>Observed strengths/limitations:</strong> Strong performance and simplicity for suitable task-parallel programs; effectiveness depends on sufficient parallelism/granularity and can be constrained by memory locality, synchronization, and extension to distributed/heterogeneous environments.</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="007-advanced-parallel-algorithms-and-decomposition.html">← Lecture 7</a><a href="009-performance-modeling-scalability-and-optimization.html">Next · Lecture 9</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body></html>

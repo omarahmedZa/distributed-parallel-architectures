@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 13 — Future of Distributed and Parallel Architectures</title>
+<link rel="stylesheet" href="../assets/lesson.css"><link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="013"><main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 5 · Lecture 13</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 5 – Advanced Research Topics</p>
+  <h1>Lecture 13 — Future of Distributed and Parallel Architectures</h1>
+  <p class="objective">Survey exascale computing, AI-driven HPC, quantum and neuromorphic architectures, and emerging research challenges, and assess their potential impact and architectural trade-offs.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">The trajectory of distributed and parallel systems is being reshaped by scale, energy constraints, data-intensive and AI workloads, and radically different computing paradigms. Understanding emerging directions helps architects and researchers anticipate opportunities and limits.</p>
+<p><strong>Prerequisites:</strong> All prior lectures, especially <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9</a>, <a href="010-heterogeneous-computing-cpu-gpu-accelerators.html">Lecture 10</a>, <a href="012-fault-tolerance-reliability-and-energy-efficient-computing.html">Lecture 12</a>.</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Describe the goals and architectural characteristics of exascale computing.</li>
+  <li>Explain how AI is influencing and being supported by HPC systems.</li>
+  <li>Outline basic ideas behind quantum and neuromorphic computing architectures.</li>
+  <li>Identify cross-cutting emerging research challenges and trade-offs.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Exascale computing</h3>
+<p><strong>Exascale systems</strong> target sustained performance on the order of 10<sup>18</sup> floating-point operations per second (and beyond) for demanding scientific workloads. Achieving this requires extreme parallelism, heterogeneous nodes (CPUs+accelerators), high-bandwidth memory and interconnects, scalable storage, and energy/resilience-aware design. Key challenges include power efficiency, data movement, programmability, and fault tolerance at massive component counts (Lectures 3, 9, 10, 12).</p>
+
+<h3>AI-driven HPC</h3>
+<p>AI and HPC increasingly converge: HPC systems run large-scale training/inference workloads, while AI techniques are applied to optimize HPC itself (e.g. performance tuning, scheduling, anomaly detection, surrogate modeling, workflow steering). Architecturally this drives demand for mixed-precision arithmetic, tensor/accelerator units, high-bandwidth interconnects for distributed training, and software stacks that integrate simulation and learning pipelines.</p>
+
+<h3>Quantum computing architectures</h3>
+<p><strong>Quantum computers</strong> use qubits and quantum operations (superposition, entanglement, interference) to solve certain problems with potential advantage over classical methods. Current practical devices are largely in the noisy intermediate-scale quantum (NISQ) era: limited qubit counts, gate errors, short coherence times, and significant control/cryogenic infrastructure. Hybrid classical–quantum architectures offload suitable subproblems to quantum processors while classical systems handle control, orchestration, and error mitigation/correction.</p>
+
+<h3>Neuromorphic computing</h3>
+<p><strong>Neuromorphic architectures</strong> draw inspiration from neural structures, emphasizing event-driven/spiking computation, massive parallelism, local memory–compute integration, and energy efficiency for certain cognitive/sensory and pattern-recognition workloads. They differ fundamentally from von Neumann designs and may complement conventional accelerators for specialized tasks, but programming models, algorithms, and maturity remain active research areas.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 220" role="img" aria-labelledby="f-fut-t f-fut-d">
+    <title id="f-fut-t">Emerging architectural directions</title>
+    <desc id="f-fut-d">Blocks for exascale, AI-accelerated HPC, quantum, and neuromorphic approaches highlighting different strengths.</desc>
+    <rect x="30" y="50" width="160" height="110" rx="8" fill="var(--card)" stroke="var(--rule)"/><text x="60" y="85" font-size="12">Exascale HPC</text><text x="45" y="110" font-size="10" fill="var(--ink-soft)">massive parallelism</text><text x="45" y="128" font-size="10" fill="var(--ink-soft)">energy/resilience</text>
+    <rect x="210" y="50" width="160" height="110" rx="8" fill="var(--card)" stroke="var(--rule)"/><text x="235" y="85" font-size="12">AI-driven HPC</text><text x="225" y="110" font-size="10" fill="var(--ink-soft)">accelerators + data</text><text x="225" y="128" font-size="10" fill="var(--ink-soft)">learning &amp; tuning</text>
+    <rect x="390" y="50" width="160" height="110" rx="8" fill="var(--card)" stroke="var(--rule)"/><text x="430" y="85" font-size="12">Quantum</text><text x="405" y="110" font-size="10" fill="var(--ink-soft)">qubits, hybrid</text><text x="405" y="128" font-size="10" fill="var(--ink-soft)">NISQ limits</text>
+    <rect x="570" y="50" width="160" height="110" rx="8" fill="var(--card)" stroke="var(--rule)"/><text x="600" y="85" font-size="12">Neuromorphic</text><text x="585" y="110" font-size="10" fill="var(--ink-soft)">event-driven</text><text x="585" y="128" font-size="10" fill="var(--ink-soft)">efficiency niches</text>
+  </svg>
+  <figcaption>Future systems are likely heterogeneous and hybrid, combining paradigms to match problem characteristics and constraints.</figcaption>
+</figure>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<ul>
+  <li><strong>General-purpose vs specialized:</strong> accelerators and novel paradigms improve efficiency for targets but reduce flexibility and increase integration complexity.</li>
+  <li><strong>Scale vs manageability:</strong> exascale capability increases power, resilience, and programmability burdens.</li>
+  <li><strong>Classical vs quantum/neuromorphic roles:</strong> hybrid models exploit strengths but require new interfaces, toolchains, and algorithms.</li>
+  <li><strong>Performance vs energy/sustainability:</strong> energy-to-solution and total cost become central design metrics.</li>
+</ul>
+
+<h2>Limitations and emerging challenges</h2>
+<ul>
+  <li>Data movement and memory bottlenecks persist across paradigms.</li>
+  <li>Programmability and portability across heterogeneous/future systems remain difficult.</li>
+  <li>Quantum devices face noise, error correction overheads, and limited applicability; neuromorphic systems face maturity and software ecosystem gaps.</li>
+  <li>Reliability, security, and reproducibility grow more complex at scale and in hybrid environments.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Post-exascale architectures balancing performance, energy, and resilience.</li>
+  <li>Co-design of hardware, systems software, and algorithms for AI+HPC workflows.</li>
+  <li>Scalable quantum error correction, hybrid algorithms, and practical quantum integration.</li>
+  <li>Neuromorphic algorithms, programming abstractions, and system integration.</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ol class="quiz">
+  <li>Why are exascale systems typically heterogeneous?
+    <details><summary>Show answer</summary><p>Heterogeneous CPU+accelerator designs provide the throughput and energy efficiency needed to reach exascale performance within power and scalability constraints.</p></details>
+  </li>
+  <li>What is a realistic current limitation of quantum computing architectures?
+    <details><summary>Show answer</summary><p>Many current systems are NISQ devices with limited qubits, noise/coherence constraints, and significant error mitigation/correction challenges, restricting practical applications.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> J. Preskill, “Quantum Computing in the NISQ era and beyond,” <em>Quantum</em>, vol. 2, p. 79, Aug. 2018. DOI: <a href="https://doi.org/10.22331/q-2018-08-06-79">10.22331/q-2018-08-06-79</a>.</p>
+    <p><strong>Core contribution:</strong> Characterizes the NISQ (Noisy Intermediate-Scale Quantum) era and discusses near-term prospects and longer-term paths toward fault-tolerant quantum computing.</p>
+    <p><strong>Method/architecture:</strong> Conceptual/analytical perspective on device capabilities, noise, error correction requirements, and potential applications/algorithms.</p>
+    <p><strong>Key results:</strong> Clarifies realistic expectations for near-term quantum devices and the challenges that must be overcome for scalable, advantageous quantum computation.</p>
+    <p><strong>Limitations:</strong> A perspective article (not an experimental system paper); progress is rapid and specific hardware milestones and applications continue to evolve.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> C. Mead, “Neuromorphic Electronic Systems,” <em>Proceedings of the IEEE</em>, vol. 78, no. 10, pp. 1629–1636, Oct. 1990. DOI: <a href="https://doi.org/10.1109/5.58356">10.1109/5.58356</a>.</p>
+    <p><strong>Core contribution:</strong> Introduces and motivates neuromorphic engineering—using analog VLSI and neural-inspired principles to build efficient information-processing systems.</p>
+    <p><strong>Method/architecture:</strong> Describes architectures and circuits that emulate aspects of biological neural computation, emphasizing parallelism and low-power operation.</p>
+    <p><strong>Key results:</strong> Establishes foundational ideas for neuromorphic hardware that influenced decades of subsequent research into brain-inspired computing systems.</p>
+    <p><strong>Limitations:</strong> Early vision and implementations; modern neuromorphic platforms differ substantially, and challenges in programmability, algorithms, and broad applicability remain.</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Quantum computing vs Neuromorphic computing (emerging paradigms)</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Quantum computing</th><th>Neuromorphic computing</th></tr>
+      <tr><td>Computational model</td><td>Qubits, unitary/gate operations, measurement; exploits quantum phenomena</td><td>Event-driven/spiking, neuron-synapse inspired parallelism</td></tr>
+      <tr><td>Potential strengths</td><td>Algorithmic advantage for specific problems (e.g. certain simulation/factoring/search formulations)</td><td>High energy efficiency and parallelism for certain sensory/cognitive/pattern tasks</td></tr>
+      <tr><td>Limitations</td><td>Noise/coherence, error correction overhead, limited mature software/hardware</td><td>Maturity, programming/algorithm mapping, and general-purpose applicability</td></tr>
+      <tr><td>Suitable use cases</td><td>Specialized kernels where quantum algorithms apply (longer-term/fault-tolerant)</td><td>Low-power inference, event-based sensing, brain-inspired workloads (niche/ongoing)</td></tr>
+    </table></div>
+    <p class="note-muted">Closest meaningful comparison: both are non–von Neumann paradigms offering potential advantages for specialized workloads while requiring hybrid integration with classical systems.</p>
+  </section>
+  <section class="case-study">
+    <h3>Case study — Frontier exascale system as a platform for AI and scientific computing</h3>
+    <p><strong>What it is:</strong> Frontier (Oak Ridge National Laboratory) is an exascale-class heterogeneous supercomputer used for large-scale simulation, data analysis, and AI-enabled scientific workloads.</p>
+    <p><strong>Architectural design:</strong> Combines CPUs and GPUs with high-bandwidth memory and a high-performance interconnect in a massively parallel configuration, supported by software stacks for hybrid parallelism and data-intensive workflows.</p>
+    <p><strong>How it addresses lecture challenges:</strong> Represents the convergence of exascale performance and AI/HPC workloads, addressing scale and throughput demands while contending with energy, data movement, and resilience constraints.</p>
+    <p><strong>Observed strengths/limitations:</strong> Enables unprecedented capability for suitable applications; practical challenges include power/energy management, programmability and porting, efficient data movement, and achieving sustained performance across diverse emerging workloads (as characterized in public exascale system documentation).</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="012-fault-tolerance-reliability-and-energy-efficient-computing.html">← Lecture 12</a><a href="../index.html">Course map →</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body></html>

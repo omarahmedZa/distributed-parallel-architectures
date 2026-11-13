@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 2 — Advanced Memory Architectures and Memory Hierarchy</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="002">
+<main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 1 · Lecture 2</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 1 – Advanced Parallel Computer Architectures</p>
+  <h1>Lecture 2 — Advanced Memory Architectures and Memory Hierarchy</h1>
+  <p class="objective">Explain cache coherence and memory consistency mechanisms (including MESI), analyze NUMA architectures and shared-memory challenges, and reason about the performance and scalability trade-offs they impose.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">In shared-memory parallel systems, correctness and performance hinge on how caches and memories behave under concurrent access. Coherence, consistency, and NUMA placement can enable programmability—or silently dominate runtime.</p>
+<p><strong>Prerequisites:</strong> <a href="000-fundamentals.html">Fundamentals — cache &amp; memory hierarchy</a> (locality, levels, coherence/consistency intuition).</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Describe cache coherence problems and how invalidation/update protocols address them.</li>
+  <li>Explain the MESI protocol states and transitions at an architectural level.</li>
+  <li>Characterize NUMA architectures and their performance implications.</li>
+  <li>Compare memory consistency models and identify shared-memory challenges and trade-offs.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Cache coherence</h3>
+<p>Multiple cores caching the same memory line can observe stale values after writes. <strong>Cache coherence</strong> provides rules ensuring a single-writer/multiple-reader invariant (or equivalent) per location so that reads eventually see writes appropriately. Two broad approaches exist: <em>snooping</em> protocols (common on small buses/interconnects, cores observe transactions) and <em>directory-based</em> protocols (a directory tracks sharers/owners, scalable to larger systems). Coherence operates at cache-line granularity and generates traffic (invalidations, writebacks, fetches).</p>
+
+<h3>MESI protocol</h3>
+<p>MESI is a widely used invalidation-based coherence protocol with four stable states per cache line:</p>
+<div class="table-wrap"><table>
+  <tr><th>State</th><th>Meaning</th><th>Implication</th></tr>
+  <tr><td><strong>M (Modified)</strong></td><td>Line present only in this cache and dirty (different from memory).</td><td>Cache must supply/write back data on eviction or requests.</td></tr>
+  <tr><td><strong>E (Exclusive)</strong></td><td>Line present only in this cache and clean (matches memory).</td><td>Can transition to M silently on local write (no bus invalidate needed).</td></tr>
+  <tr><td><strong>S (Shared)</strong></td><td>Line may be present in other caches; clean.</td><td>Local write requires invalidating other sharers.</td></tr>
+  <tr><td><strong>I (Invalid)</strong></td><td>Line not valid in this cache.</td><td>Read/write misses must obtain a valid copy/ownership.</td></tr>
+</table></div>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 320" role="img" aria-labelledby="f-mesi-t f-mesi-d">
+    <title id="f-mesi-t">MESI states (simplified)</title>
+    <desc id="f-mesi-d">Four nodes M, E, S, I with arrows indicating read/write/local/remote events causing transitions.</desc>
+    <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker></defs>
+    <circle cx="180" cy="90" r="42" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="180" y="95" text-anchor="middle" font-size="16" fill="var(--ink)">M</text>
+    <circle cx="580" cy="90" r="42" fill="var(--card)" stroke="var(--rule)"/><text x="580" y="95" text-anchor="middle" font-size="16">E</text>
+    <circle cx="180" cy="240" r="42" fill="var(--card)" stroke="var(--rule)"/><text x="180" y="245" text-anchor="middle" font-size="16">S</text>
+    <circle cx="580" cy="240" r="42" fill="var(--card)" stroke="var(--rule)"/><text x="580" y="245" text-anchor="middle" font-size="16">I</text>
+    <line x1="222" y1="90" x2="538" y2="90" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="380" y="80" text-anchor="middle" font-size="11" fill="var(--ink-soft)">writeback</text>
+    <line x1="538" y1="100" x2="222" y2="100" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="380" y="118" text-anchor="middle" font-size="11" fill="var(--ink-soft)">local write</text>
+    <line x1="580" y1="132" x2="580" y2="198" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="640" y="170" font-size="11" fill="var(--ink-soft)">remote read/write</text>
+    <line x1="180" y1="132" x2="180" y2="198" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="95" y="170" font-size="11" fill="var(--ink-soft)">remote read/write</text>
+    <line x1="222" y1="240" x2="538" y2="240" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="380" y="258" text-anchor="middle" font-size="11" fill="var(--ink-soft)">invalidate/evict paths</text>
+    <line x1="538" y1="230" x2="222" y2="230" stroke="var(--ink-faint)" marker-end="url(#arr)"/><text x="380" y="222" text-anchor="middle" font-size="11" fill="var(--ink-soft)">read miss / fill</text>
+  </svg>
+  <figcaption>Simplified MESI view: writes to shared lines require invalidations; exclusive/modified states optimize private or write-heavy access. Real implementations include transient states and interconnect-specific details.</figcaption>
+</figure>
+
+<h3>NUMA architectures</h3>
+<p><strong>Non-Uniform Memory Access (NUMA)</strong> systems provide a single logical address space but with memory physically distributed across nodes/sockets; access latency and bandwidth depend on whether data is local or remote. NUMA improves memory bandwidth scaling versus a single centralized memory, but performance becomes placement-sensitive.</p>
+<ul>
+  <li><strong>Benefits:</strong> higher aggregate memory bandwidth/capacity, scalable shared-memory organization.</li>
+  <li><strong>Costs:</strong> remote access penalties, contention on inter-socket links, need for locality-aware allocation/scheduling.</li>
+</ul>
+
+<h3>Memory consistency models</h3>
+<p>Coherence makes per-location behavior sensible; <strong>memory consistency models</strong> specify ordering of reads/writes across different locations as observed by threads. Stronger models (e.g. sequential consistency intuition) simplify reasoning but restrict hardware/compiler reordering and can reduce performance; weaker/relaxed models allow more optimizations but require explicit synchronization/fences for ordering. Correct parallel programs rely on the model’s guarantees plus synchronization primitives.</p>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<div class="table-wrap"><table>
+  <tr><th>Design choice</th><th>Benefit</th><th>Cost / trade-off</th></tr>
+  <tr><td>Snooping coherence</td><td>Simple, low-latency for small systems</td><td>Broadcast/snoop traffic limits scalability</td></tr>
+  <tr><td>Directory coherence</td><td>Scales by tracking sharers</td><td>Directory storage/lookup latency and protocol complexity</td></tr>
+  <tr><td>Stronger consistency</td><td>Easier reasoning about program order</td><td>Constrains reordering/overlap, potential performance loss</td></tr>
+  <tr><td>Relaxed consistency</td><td>More latency hiding and optimization freedom</td><td>Harder programming; requires fences/synchronization discipline</td></tr>
+  <tr><td>NUMA distribution</td><td>Bandwidth/capacity scaling</td><td>Locality sensitivity, remote penalties, placement complexity</td></tr>
+</table></div>
+
+<h2>Limitations, scalability, and shared-memory challenges</h2>
+<ul>
+  <li><strong>Coherence traffic:</strong> invalidations and data movement grow with sharing/write intensity and core count.</li>
+  <li><strong>False sharing:</strong> unrelated variables on the same cache line cause needless coherence misses.</li>
+  <li><strong>Synchronization cost:</strong> locks/atomics/barriers interact with coherence and ordering.</li>
+  <li><strong>NUMA effects:</strong> poor placement yields remote accesses and bandwidth imbalance.</li>
+  <li><strong>Programmability vs performance:</strong> relaxed models and NUMA tuning increase optimization burden.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Scalable, low-latency coherence for many-core and heterogeneous systems.</li>
+  <li>Memory consistency/programmability interfaces that balance correctness and performance.</li>
+  <li>NUMA- and heterogeneity-aware data placement, migration, and profiling.</li>
+  <li>Reducing data-movement costs (near-memory processing, smarter caches/interconnects).</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ul>
+  <li>Coherence maintains a consistent view per memory location across caches; MESI captures modified/exclusive/shared/invalid states.</li>
+  <li>NUMA scales memory resources but introduces non-uniform access costs.</li>
+  <li>Consistency models govern cross-address ordering; stronger models simplify reasoning, weaker models enable performance but need synchronization.</li>
+</ul>
+<ol class="quiz">
+  <li>Why does a write to a cache line in Shared state require invalidations?
+    <details><summary>Show answer</summary><p>Other caches may hold copies; invalidation (or update) ensures they do not read stale data and preserves coherence for that line.</p></details>
+  </li>
+  <li>What is one symptom of poor NUMA locality?
+    <details><summary>Show answer</summary><p>Higher average memory access latency and/or reduced effective bandwidth due to frequent remote-node accesses and interconnect contention.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> M. S. Papamarcos and J. H. Patel, “A Low-Overhead Coherence Solution for Multiprocessors with Private Cache Memories,” in <em>Proc. 11th Annual Int’l Symp. Computer Architecture (ISCA)</em>, 1984, pp. 348–354. DOI: <a href="https://doi.org/10.1145/800015.808204">10.1145/800015.808204</a>.</p>
+    <p><strong>Core contribution:</strong> Introduces a low-overhead cache coherence approach (widely associated with the MESI-style invalidation protocol lineage) for multiprocessors with private caches.</p>
+    <p><strong>Method/architecture:</strong> Uses cache-line states and invalidation-based coherence actions to maintain consistency of shared data while reducing unnecessary traffic compared to simpler schemes.</p>
+    <p><strong>Key results:</strong> Demonstrates practical coherence with reduced overhead, influencing subsequent coherence protocol designs in shared-memory multiprocessors.</p>
+    <p><strong>Limitations:</strong> Early protocol/model assumptions target the multiprocessor scales and interconnects of its era; scaling to many cores and complex hierarchies motivates directory schemes and protocol extensions.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> L. Lamport, “How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs,” <em>IEEE Transactions on Computers</em>, vol. C-28, no. 9, pp. 690–691, Sep. 1979. DOI: <a href="https://doi.org/10.1109/TC.1979.1675439">10.1109/TC.1979.1675439</a>.</p>
+    <p><strong>Core contribution:</strong> Formulates the notion of <em>sequential consistency</em>, a foundational memory consistency model specifying that multiprocessor execution corresponds to some interleaving consistent with each processor’s program order.</p>
+    <p><strong>Method/architecture:</strong> Provides a correctness condition/definition for memory system behavior in multiprocessors rather than a specific hardware implementation.</p>
+    <p><strong>Key results:</strong> Establishes a clear, intuitive correctness baseline for reasoning about concurrent programs and memory ordering in shared-memory systems.</p>
+    <p><strong>Limitations:</strong> Strict sequential consistency can constrain hardware/compiler optimizations and performance; many systems adopt relaxed models that require explicit synchronization to regain ordering guarantees.</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Snooping vs Directory-based coherence</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Snooping coherence</th><th>Directory-based coherence</th></tr>
+      <tr><td>Mechanism</td><td>Caches observe (snoop) coherence transactions on a shared interconnect</td><td>Directory tracks which caches hold/share/own a line and sends targeted messages</td></tr>
+      <tr><td>Advantages</td><td>Conceptually simple; can be low-latency for small core counts</td><td>Scales to larger systems by avoiding global broadcast; targeted communication</td></tr>
+      <tr><td>Limitations</td><td>Broadcast/snoop bandwidth and ordering demands limit scalability</td><td>Directory storage/lookup overhead, added latency, and protocol complexity</td></tr>
+      <tr><td>Suitable use cases</td><td>Small multicore processors with shared bus/ring-like substrates</td><td>Large multicore/multi-socket and NUMA systems requiring scalable coherence</td></tr>
+    </table></div>
+  </section>
+  <section class="case-study">
+    <h3>Case study — Stanford DASH / directory-coherent NUMA multiprocessor (research system)</h3>
+    <p><strong>What it is:</strong> The Stanford DASH project (early 1990s) was a research multiprocessor demonstrating scalable cache-coherent shared memory using a directory-based coherence approach across clusters of processors.</p>
+    <p><strong>Architectural design:</strong> Combined bus-based snooping within clusters and a distributed directory protocol between clusters to maintain coherence over a scalable interconnect while providing a shared-memory abstraction.</p>
+    <p><strong>How it addresses lecture challenges:</strong> Tackled the scalability limits of pure snooping by tracking sharers and sending point-to-point coherence messages, enabling coherent shared memory across more processors/nodes than snooping alone could efficiently support.</p>
+    <p><strong>Observed strengths/limitations:</strong> Demonstrated feasibility and performance potential of scalable cache-coherent NUMA (CC-NUMA) designs; trade-offs included directory overhead, protocol complexity, and sensitivity to locality/remote-access latency—issues that remain central in modern NUMA systems.</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="001-advanced-parallel-architecture-design.html">← Lecture 1</a><a href="003-interconnection-networks-and-communication.html">Next · Lecture 3</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body>
+</html>

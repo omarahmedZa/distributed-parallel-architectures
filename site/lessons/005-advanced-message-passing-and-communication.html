@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 5 — Advanced Message Passing and Communication Mechanisms</title>
+<link rel="stylesheet" href="../assets/lesson.css"><link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="005"><main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 2 · Lecture 5</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 2 – Distributed Systems Architecture</p>
+  <h1>Lecture 5 — Advanced Message Passing and Communication Mechanisms</h1>
+  <p class="objective">Apply advanced MPI concepts—collective and non-blocking communication—and reason about communication optimization and overheads in distributed-memory systems.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">At scale, communication often limits performance more than computation. Understanding MPI collectives, non-blocking operations, and overhead sources enables architectures and programs that overlap work, reduce contention, and scale efficiently.</p>
+<p><strong>Prerequisites:</strong> <a href="000-fundamentals.html">Fundamentals — basic MPI &amp; OpenMP</a>, <a href="003-interconnection-networks-and-communication.html">Lecture 3</a> (interconnect latency/bandwidth/topology).</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Explain collective communication patterns and their performance characteristics.</li>
+  <li>Use non-blocking communication concepts to enable overlap of computation and communication.</li>
+  <li>Identify sources of communication overhead and common optimization strategies.</li>
+  <li>Analyze trade-offs between simplicity, synchronization, and scalability.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Advanced MPI concepts</h3>
+<p>MPI provides process groups/communicators, point-to-point messaging, collectives, one-sided operations, and rich datatype/topology abstractions. Advanced usage focuses on expressing communication structure so implementations can optimize for the underlying interconnect (Lecture 3) and overlap progress with computation.</p>
+
+<h3>Collective communication</h3>
+<p><strong>Collectives</strong> involve groups of processes (e.g. within a communicator). Common operations:</p>
+<div class="table-wrap"><table>
+  <tr><th>Collective</th><th>Pattern</th><th>Typical use</th></tr>
+  <tr><td><strong>Broadcast</strong></td><td>One-to-all</td><td>Distribute parameters/configuration</td></tr>
+  <tr><td><strong>Scatter / Gather</strong></td><td>One-to-all / all-to-one distribution</td><td>Partition inputs / collect results</td></tr>
+  <tr><td><strong>Reduce / Allreduce</strong></td><td>Combine values (sum/max/etc.) to one or all</td><td>Global sums, norms, convergence checks</td></tr>
+  <tr><td><strong>Alltoall</strong></td><td>All-to-all personalized exchange</td><td>Transpose/redistribution, some parallel algorithms</td></tr>
+  <tr><td><strong>Barrier</strong></td><td>Synchronization point</td><td>Phase coordination (use sparingly)</td></tr>
+</table></div>
+<p>Performance depends on algorithm choice (binomial/tree/ring), message size, process count, and topology/bisection bandwidth. For example, ring allreduce can be bandwidth-efficient for large messages, while tree algorithms can reduce latency for small messages.</p>
+
+<h3>Non-blocking communication</h3>
+<p>Non-blocking operations (e.g. <code>MPI_Isend</code>, <code>MPI_Irecv</code>, <code>MPI_Iallreduce</code> where available) initiate communication and return immediately, allowing computation to proceed while transfers progress. Correctness requires completion (<code>MPI_Wait</code>/<code>MPI_Test</code>) before accessing buffers.</p>
+<pre><code>// Illustrative overlap pattern (pseudocode)
+MPI_Irecv(buf_r, ..., req_r);
+MPI_Isend(buf_s, ..., req_s);
+compute_on_independent_data();
+MPI_Waitall(reqs);</code></pre>
+<p><strong>Benefit:</strong> hides latency and improves utilization when independent work exists and the runtime/hardware can progress communication. <strong>Cost:</strong> more complex code, buffer lifetime management, and progress-engine dependencies.</p>
+
+<h3>Communication optimization and overhead</h3>
+<ul>
+  <li><strong>Latency vs bandwidth:</strong> small messages dominated by startup latency; large messages by bandwidth. Aggregation can reduce latency overhead but may increase delay/memory.</li>
+  <li><strong>Synchronization:</strong> blocking calls and barriers can induce idle time and load-imbalance amplification.</li>
+  <li><strong>Topology awareness:</strong> mapping ranks to match communication patterns reduces hop count and congestion (Lecture 3).</li>
+  <li><strong>Overlap and pipelining:</strong> non-blocking ops and chunking can overlap phases.</li>
+  <li><strong>Serialization/contention:</strong> endpoint and network congestion, protocol overheads, and memory copies contribute to effective overhead.</li>
+</ul>
+
+<div class="callout"><span class="label">Communication-to-computation ratio</span><p>If communication time grows relative to computation (small per-process work, frequent collectives, poor scaling), efficiency drops. This ratio is central to scalability analysis in <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9</a>.</p></div>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<div class="table-wrap"><table>
+  <tr><th>Choice</th><th>Advantage</th><th>Trade-off</th></tr>
+  <tr><td>Blocking collectives</td><td>Simplicity, clear synchronization semantics</td><td>Less opportunity to overlap; sensitive to stragglers</td></tr>
+  <tr><td>Non-blocking/overlap</td><td>Latency hiding, better utilization</td><td>Complexity, progress/buffer management, debugging difficulty</td></tr>
+  <tr><td>Message aggregation</td><td>Amortizes startup latency</td><td>Increased buffering and potential latency for small urgent messages</td></tr>
+  <tr><td>Topology-aware placement</td><td>Lower effective latency/congestion</td><td>Requires system/runtime support and may constrain scheduling</td></tr>
+</table></div>
+
+<h2>Limitations and scalability</h2>
+<ul>
+  <li>Collective costs can grow with process count (algorithm- and topology-dependent).</li>
+  <li>Network contention and bisection limits cap bandwidth-heavy patterns (e.g. alltoall).</li>
+  <li>Progress and overlap depend on MPI implementation and hardware offload capabilities.</li>
+  <li>Load imbalance turns communication into synchronization bottlenecks.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Topology- and congestion-aware collective algorithms at extreme scale.</li>
+  <li>Efficient asynchronous progress/offload and overlap mechanisms.</li>
+  <li>Communication-avoiding algorithms and tighter computation–communication co-design.</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ol class="quiz">
+  <li>When is a non-blocking MPI operation beneficial?
+    <details><summary>Show answer</summary><p>When there is independent computation to perform during communication and the system can make progress on transfers, allowing latency hiding and improved utilization.</p></details>
+  </li>
+  <li>Why can frequent small collectives harm scalability?
+    <details><summary>Show answer</summary><p>They incur repeated startup/latency and synchronization costs, increasing communication overhead relative to computation as scale grows.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> R. Thakur, R. Rabenseifner, and W. Gropp, “Optimization of Collective Communication Operations in MPICH,” <em>Int’l Journal of High Performance Computing Applications</em>, vol. 19, no. 1, pp. 49–66, 2005. DOI: <a href="https://doi.org/10.1177/1094342005051521">10.1177/1094342005051521</a>.</p>
+    <p><strong>Core contribution:</strong> Presents optimized algorithms for key MPI collective operations, selecting strategies based on message size and system characteristics.</p>
+    <p><strong>Method/architecture:</strong> Implements and evaluates multiple collective algorithms (e.g. tree, ring, recursive-doubling/halving variants) within the MPICH implementation, analyzing latency/bandwidth trade-offs.</p>
+    <p><strong>Key results:</strong> Demonstrates significant performance improvements by choosing appropriate algorithms per operation and message size, influencing practical MPI collective implementations.</p>
+    <p><strong>Limitations:</strong> Optimal choices depend on topology, scale, and runtime/hardware features; evolving interconnects and heterogeneity require continued tuning and new algorithms.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> T. Hoefler, P. Gottschling, A. Lumsdaine, and W. Rehm, “Optimizing a Conjugate Gradient Solver with Non-Blocking Collective Operations,” <em>Parallel Computing</em>, vol. 33, no. 9, pp. 624–633, 2007. DOI: <a href="https://doi.org/10.1016/j.parco.2007.06.006">10.1016/j.parco.2007.06.006</a> (preprint: <a href="https://doi.org/10.1007/978-3-540-74466-5_40">Euro-Par 2007 version, 10.1007/978-3-540-74466-5_40</a>).</p>
+    <p><strong>Core contribution:</strong> Shows how non-blocking collective operations can overlap communication with computation in iterative solvers to improve performance.</p>
+    <p><strong>Method/architecture:</strong> Reformulates/structures communication in a conjugate gradient method to use non-blocking collectives and evaluates overlap benefits.</p>
+    <p><strong>Key results:</strong> Demonstrates measurable speedups when communication can be effectively overlapped with independent computation, motivating asynchronous collective interfaces.</p>
+    <p><strong>Limitations:</strong> Benefits depend on availability of independent work, MPI progress behavior, and network/hardware support; code complexity and portability/semantics considerations remain.</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Blocking vs Non-blocking communication</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Blocking communication</th><th>Non-blocking communication</th></tr>
+      <tr><td>Semantics</td><td>Call returns when operation/buffer use conditions satisfied per API</td><td>Call returns immediately; completion tested/waited separately</td></tr>
+      <tr><td>Advantages</td><td>Simpler programming and reasoning; implicit synchronization points</td><td>Enables overlap of communication and computation; can hide latency</td></tr>
+      <tr><td>Limitations</td><td>Idle time when waiting; harder to overlap</td><td>Higher complexity, buffer/progress management, harder debugging</td></tr>
+      <tr><td>Suitable use cases</td><td>Simple phases, tight dependencies, small-scale or clarity-first code</td><td>Latency-sensitive/scalable codes with independent work and tunable overlap</td></tr>
+    </table></div>
+  </section>
+  <section class="case-study">
+    <h3>Case study — MPI in large-scale scientific simulations (e.g. climate/weather models)</h3>
+    <p><strong>What it is:</strong> Many production climate and weather simulation codes use MPI to decompose global domains across thousands of processes on HPC clusters/supercomputers.</p>
+    <p><strong>Architectural design:</strong> Domain decomposition maps spatial regions to ranks; halo/neighbor exchanges use point-to-point communication and global operations (reductions, collectives) for diagnostics and coupling, often tuned for interconnect topology and message sizes.</p>
+    <p><strong>How it addresses lecture challenges:</strong> Employs optimized collectives and overlap strategies to manage communication overheads and maintain scalability as resolution and core counts increase.</p>
+    <p><strong>Observed strengths/limitations:</strong> Enables high-resolution, parallel simulations at scale; performance is sensitive to communication-to-computation ratio, load balance, collective costs, and network contention, requiring continual optimization (characteristics widely reported in HPC practice).</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="004-distributed-computing-architectures-and-models.html">← Lecture 4</a><a href="006-distributed-synchronization-and-consistency.html">Next · Lecture 6</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body></html>

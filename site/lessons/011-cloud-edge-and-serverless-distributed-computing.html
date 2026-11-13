@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 11 — Cloud, Edge and Serverless Distributed Computing</title>
+<link rel="stylesheet" href="../assets/lesson.css"><link rel="stylesheet" href="../assets/figures.css">
+</head>
+<body data-lesson="011"><main>
+<nav class="topline"><a href="../index.html">← Course map</a><span class="pill">Module 4 · Lecture 11</span></nav>
+<header class="masthead">
+  <p class="kicker">Module 4 – Heterogeneous and Emerging Architectures</p>
+  <h1>Lecture 11 — Cloud, Edge and Serverless Distributed Computing</h1>
+  <p class="objective">Understand cloud HPC architectures, virtualization/containerization, distributed resource management, edge computing, and dynamic scaling (including serverless models), and evaluate their trade-offs for modern distributed workloads.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Cloud, edge, and serverless platforms reshape how distributed and parallel workloads are deployed and scaled. Architectural choices in virtualization, isolation, placement, and elasticity determine performance, cost, latency, and manageability.</p>
+<p><strong>Prerequisites:</strong> <a href="004-distributed-computing-architectures-and-models.html">Lecture 4</a>, <a href="003-interconnection-networks-and-communication.html">Lecture 3</a>, <a href="009-performance-modeling-scalability-and-optimization.html">Lecture 9</a>.</p>
+
+<h2>Learning objectives</h2>
+<ul>
+  <li>Describe cloud HPC architecture and distributed resource management mechanisms.</li>
+  <li>Compare virtualization and containerization for isolation and deployment.</li>
+  <li>Explain edge computing motivations and architectural implications.</li>
+  <li>Analyze dynamic resource scaling and serverless execution trade-offs.</li>
+</ul>
+
+<h2>Core ideas and mechanisms</h2>
+<h3>Cloud HPC architecture</h3>
+<p>Cloud HPC provides on-demand access to compute clusters, accelerators (Lecture 10), high-speed interconnects, and parallel storage. Architectures virtualize or bare-metal-provision resources, schedule jobs/instances across multi-tenant infrastructure, and offer elasticity (scale up/out). Performance depends on instance placement, network topology/bandwidth, storage throughput, and virtualization overheads.</p>
+
+<h3>Distributed resource management</h3>
+<p>Resource managers and orchestrators allocate compute, memory, storage, and network to tenants and workloads based on policies (fairness, priority, QoS, cost). They handle placement, autoscaling, failure recovery, and multi-tenancy isolation, often using hierarchical or decentralized control to scale (related to Lecture 8).</p>
+
+<h3>Virtualization and containerization</h3>
+<div class="table-wrap"><table>
+  <tr><th>Technology</th><th>Isolation/abstraction</th><th>Strengths</th><th>Limitations</th></tr>
+  <tr><td><strong>Virtual machines (VMs)</strong></td><td>Full hardware virtualization; guest OS per VM</td><td>Strong isolation, OS flexibility, mature security boundaries</td><td>Higher overhead (boot time, memory, I/O), less density</td></tr>
+  <tr><td><strong>Containers</strong></td><td>OS-level isolation sharing host kernel (namespaces/cgroups)</td><td>Lightweight, fast startup, high density, portable images</td><td>Weaker isolation boundary than VMs, kernel dependence</td></tr>
+</table></div>
+<p>HPC and latency-sensitive services may use bare metal or tuned virtualization to reduce overhead and jitter; cloud-native services often favor containers and orchestration (e.g. Kubernetes-style systems).</p>
+
+<h3>Edge computing</h3>
+<p><strong>Edge computing</strong> places computation/storage closer to data sources/users (devices, gateways, micro-datacenters) to reduce latency, bandwidth usage, and improve privacy/local autonomy. Architectures distribute processing across device–edge–cloud tiers, introducing heterogeneity, intermittent connectivity, and constrained resources.</p>
+
+<h3>Serverless and dynamic resource scaling</h3>
+<p><strong>Dynamic scaling</strong> adjusts resources to load (horizontal/vertical autoscaling). <strong>Serverless/FaaS</strong> abstracts server management: users deploy functions triggered by events; the platform provisions, scales (including to zero), and bills per execution. Benefits include elasticity and operational simplicity; challenges include cold starts, execution limits, state management, and communication overheads for tightly coupled parallel workloads.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 760 240" role="img" aria-labelledby="f-ce-t f-ce-d">
+    <title id="f-ce-t">Cloud–edge continuum</title>
+    <desc id="f-ce-d">Devices at edge connect to edge nodes and to centralized cloud/HPC resources, showing tiered placement.</desc>
+    <rect x="40" y="150" width="90" height="45" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="55" y="178" font-size="11">Devices</text>
+    <rect x="170" y="120" width="110" height="55" rx="6" fill="var(--card)" stroke="var(--rule)"/><text x="190" y="152" font-size="11">Edge nodes</text>
+    <rect x="330" y="80" width="140" height="70" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="360" y="110" font-size="12">Cloud / HPC</text><text x="350" y="130" font-size="10" fill="var(--ink-soft)">elastic resources</text>
+    <rect x="520" y="60" width="180" height="110" rx="8" fill="var(--card)" stroke="var(--rule)"/><text x="555" y="90" font-size="11">Managed services</text><text x="545" y="115" font-size="10" fill="var(--ink-soft)">VMs, containers,</text><text x="545" y="132" font-size="10" fill="var(--ink-soft)">serverless, storage</text>
+    <line x1="130" y1="170" x2="170" y2="150" stroke="var(--ink-faint)"/><line x1="280" y1="145" x2="330" y2="120" stroke="var(--ink-faint)"/><line x1="470" y1="115" x2="520" y2="115" stroke="var(--ink-faint)"/>
+    <text x="140" y="210" font-size="10" fill="var(--ink-soft)">low latency / local</text><text x="360" y="210" font-size="10" fill="var(--ink-soft)">high capacity / global</text>
+  </svg>
+  <figcaption>Placement across device–edge–cloud trades latency, bandwidth, capacity, and management complexity.</figcaption>
+</figure>
+
+<h2>Architectural design decisions and trade-offs</h2>
+<ul>
+  <li><strong>Placement:</strong> edge for low latency/locality vs cloud for capacity/aggregation.</li>
+  <li><strong>Isolation mechanism:</strong> VMs for strong isolation vs containers for density/speed vs bare metal for performance predictability.</li>
+  <li><strong>Elasticity model:</strong> reserved/provisioned for predictability vs autoscaled/serverless for variable demand and cost efficiency.</li>
+  <li><strong>State and coupling:</strong> serverless suits stateless/event-driven tasks; tightly coupled HPC/low-latency communication favors persistent clusters.</li>
+</ul>
+
+<h2>Limitations and scalability</h2>
+<ul>
+  <li>Virtualization/network virtualization can add latency/jitter and reduce HPC efficiency.</li>
+  <li>Multi-tenancy introduces interference/noisy-neighbor effects.</li>
+  <li>Edge environments face resource constraints, heterogeneity, and unreliable connectivity.</li>
+  <li>Serverless cold starts, time/memory limits, and data locality hinder long-running or tightly coupled parallel jobs.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>High-performance, low-jitter cloud networking and virtualization for HPC/AI workloads.</li>
+  <li>Resource management and scheduling across cloud–edge–device continuum.</li>
+  <li>Programming models for stateful, data-intensive, and latency-sensitive serverless/edge applications.</li>
+  <li>Energy, cost, and QoS-aware placement and scaling.</li>
+</ul>
+
+<h2>Recap and check for understanding</h2>
+<ol class="quiz">
+  <li>Why is edge computing useful for latency-sensitive applications?
+    <details><summary>Show answer</summary><p>Processing data closer to sources/users reduces round-trip latency and network bandwidth usage compared to sending all data to distant cloud resources.</p></details>
+  </li>
+  <li>What is one reason serverless is often a poor fit for tightly coupled parallel HPC jobs?
+    <details><summary>Show answer</summary><p>Cold starts, execution limits, ephemeral/stateless environments, and high/variable communication overheads make sustained low-latency coordination and data locality difficult.</p></details>
+  </li>
+</ol>
+
+<h2>Research Activities</h2>
+<div class="research-activities">
+  <section class="paper">
+    <h3>Literature review — Paper 1</h3>
+    <p class="citation"><span class="tag">Citation</span> M. Armbrust, A. Fox, R. Griffith, et al., “A View of Cloud Computing,” <em>Communications of the ACM</em>, vol. 53, no. 4, pp. 50–58, Apr. 2010. DOI: <a href="https://doi.org/10.1145/1721654.1721672">10.1145/1721654.1721672</a>.</p>
+    <p><strong>Core contribution:</strong> Provides a foundational characterization of cloud computing, its service models, opportunities, and key technical/economic challenges.</p>
+    <p><strong>Method/architecture:</strong> Synthesizes cloud properties (elasticity, pay-as-you-go, resource pooling) and analyzes obstacles and research/engineering issues.</p>
+    <p><strong>Key results:</strong> Clarifies why cloud models enable scalable, on-demand computing and identifies challenges such as availability, data lock-in, performance unpredictability, and security.</p>
+    <p><strong>Limitations:</strong> Early perspective; technologies (containers, serverless, specialized accelerators, edge integration) have evolved, though core trade-offs remain relevant.</p>
+  </section>
+  <section class="paper">
+    <h3>Literature review — Paper 2</h3>
+    <p class="citation"><span class="tag">Citation</span> M. Satyanarayanan, “The Emergence of Edge Computing,” <em>Computer</em>, vol. 50, no. 1, pp. 30–39, Jan. 2017. DOI: <a href="https://doi.org/10.1109/MC.2017.9">10.1109/MC.2017.9</a>.</p>
+    <p><strong>Core contribution:</strong> Articulates the motivations, architectural vision, and challenges of edge computing as a complement to cloud computing.</p>
+    <p><strong>Method/architecture:</strong> Discusses edge/cloudlets, latency/bandwidth/privacy drivers, and system issues in distributing computation closer to data sources.</p>
+    <p><strong>Key results:</strong> Frames edge computing as essential for latency-sensitive and bandwidth-intensive applications, outlining requirements for infrastructure and software support.</p>
+    <p><strong>Limitations:</strong> High-level vision; deployment specifics vary widely, and challenges in management, security, heterogeneity, and programming models continue to be active research areas.</p>
+  </section>
+  <section class="comparison">
+    <h3>Architecture comparison — Virtual machines vs Containers</h3>
+    <div class="table-wrap compare-grid"><table>
+      <tr><th>Dimension</th><th>Virtual machines</th><th>Containers</th></tr>
+      <tr><td>Isolation</td><td>Hardware-level virtualization with separate guest kernels</td><td>OS-level isolation sharing host kernel</td></tr>
+      <tr><td>Advantages</td><td>Strong isolation, broad OS support, mature boundaries</td><td>Lightweight, fast startup, efficient packing, portable deployment</td></tr>
+      <tr><td>Limitations</td><td>Higher resource/boot overhead, less density</td><td>Weaker isolation than VMs, host-kernel dependency/compatibility</td></tr>
+      <tr><td>Suitable use cases</td><td>Multi-tenant isolation, heterogeneous OS needs, legacy workloads</td><td>Microservices, cloud-native apps, rapid scaling and CI/CD workflows</td></tr>
+    </table></div>
+  </section>
+  <section class="case-study">
+    <h3>Case study — AWS ParallelCluster / cloud HPC environments</h3>
+    <p><strong>What it is:</strong> AWS ParallelCluster is an open-source cluster management tool for deploying and managing HPC clusters in the AWS cloud, representative of cloud-based HPC architectures.</p>
+    <p><strong>Architectural design:</strong> Automates provisioning of compute instances (including accelerators), networking, shared storage, and schedulers (e.g. Slurm) with elastic scaling and integration into cloud resource management services.</p>
+    <p><strong>How it addresses lecture challenges:</strong> Enables on-demand, dynamically scalable HPC resources and simplifies distributed cluster setup, bringing virtualization/orchestration and elasticity to parallel workloads.</p>
+    <p><strong>Observed strengths/limitations:</strong> Offers flexibility, rapid provisioning, and access to diverse hardware; performance for tightly coupled workloads can be affected by instance placement, network performance, virtualization overheads, and cost—requiring tuning compared to dedicated supercomputers (characteristics typical of cloud HPC deployments).</p>
+  </section>
+</div>
+
+<div class="next"><div class="pager"><a href="010-heterogeneous-computing-cpu-gpu-accelerators.html">← Lecture 10</a><a href="012-fault-tolerance-reliability-and-energy-efficient-computing.html">Next · Lecture 12</a></div></div>
+</main>
+<script src="../assets/course.js" defer></script>
+</body></html>

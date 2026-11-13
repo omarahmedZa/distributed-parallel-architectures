@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distributed and Parallel Architectures — course map</title>
+<link rel="stylesheet" href="assets/lesson.css">
+<link rel="stylesheet" href="assets/figures.css">
+<meta name="description" content="Graduate/advanced course on Distributed and Parallel Architectures: fundamentals, 13 lectures, diagrams, worked examples, and research activities.">
+</head>
+<body data-page="index">
+<main>
+<nav class="topline">
+  <a href="./">Course map</a>
+  <span class="grow"></span>
+  <span class="pill hide-sm">Fundamentals + 13 lectures</span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="hero">
+  <div>
+    <p class="kicker">5 modules · Fundamentals first · 13 lectures · Research activities in every lecture</p>
+    <h1>Distributed and Parallel Architectures</h1>
+    <p class="sub">A rigorous, visualization-rich course for students with basic systems/programming background. Learn architectural design decisions, advanced mechanisms, trade-offs, scalability, and open research problems—from parallel foundations to exascale and emerging paradigms.</p>
+    <a class="continue" data-continue href="lessons/000-fundamentals.html">Start → Fundamentals</a>
+  </div>
+  <div class="ring" style="--p:0"><div class="inner"><span class="pct">0%</span><span class="cap">progress</span></div></div>
+</header>
+
+<p style="font-size:.9rem;color:var(--ink-soft);margin-top:1.2rem">Progress indicators (if enabled by course scripts) are stored on this device only. All lectures include objectives, core mechanisms, trade-offs, limitations/scalability, research problems, and a dedicated Research Activities section (2 papers, comparison, case study).</p>
+
+<a class="tour-banner" href="tour.html"><span class="k">New here?</span><span class="body"><strong>Take the 2-minute tour</strong> — how lessons are structured, how to use diagrams/animations, worked examples, checks, and research activities.</span><span class="go">Open →</span></a>
+
+<section class="unit" data-unit="0" id="fundamentals">
+  <div class="unit-head">
+    <h2>Fundamentals · Prerequisites (taught first)</h2>
+    <span class="meta">1 module</span>
+    <span class="bar"><i></i></span>
+  </div>
+  <ol class="topics">
+    <li class="topic" data-lesson="000" data-unit="0"><span class="topic-num">F0</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/000-fundamentals.html">Fundamentals of Parallel and Distributed Computing</a><span class="topic-objective">Parallelism basics &amp; Flynn’s taxonomy; shared vs distributed memory; cache/memory hierarchy (→ L2); MPI &amp; OpenMP basics (→ L5); speedup &amp; efficiency (→ L9).</span></span><span class="topic-meta">Prereq</span></li>
+  </ol>
+</section>
+
+<section class="unit" data-unit="1" id="module-1">
+  <div class="unit-head"><h2>Module 1 · Advanced Parallel Computer Architectures</h2><span class="meta">3 lectures</span><span class="bar"><i></i></span></div>
+  <ol class="topics">
+    <li class="topic" data-lesson="001"><span class="topic-num">01</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/001-advanced-parallel-architecture-design.html">Advanced Parallel Architecture Design</a><span class="topic-objective">Evolution of parallel architectures; multicore and many-core systems; architectural trade-offs; performance and scalability.</span></span></li>
+    <li class="topic" data-lesson="002"><span class="topic-num">02</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/002-advanced-memory-architectures-and-hierarchy.html">Advanced Memory Architectures and Memory Hierarchy</a><span class="topic-objective">Cache coherence; MESI; NUMA; memory consistency models; shared-memory challenges.</span></span></li>
+    <li class="topic" data-lesson="003"><span class="topic-num">03</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/003-interconnection-networks-and-communication.html">Interconnection Networks and Communication Architectures</a><span class="topic-objective">Mesh, Torus, Fat-Tree, Hypercube; switching; routing; latency and bandwidth trade-offs.</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" data-unit="2" id="module-2">
+  <div class="unit-head"><h2>Module 2 · Distributed Systems Architecture</h2><span class="meta">3 lectures</span><span class="bar"><i></i></span></div>
+  <ol class="topics">
+    <li class="topic" data-lesson="004"><span class="topic-num">04</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/004-distributed-computing-architectures-and-models.html">Distributed Computing Architectures and Models</a><span class="topic-objective">Distributed architectures; client-server; peer-to-peer; cluster; grid; distributed memory models.</span></span></li>
+    <li class="topic" data-lesson="005"><span class="topic-num">05</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/005-advanced-message-passing-and-communication.html">Advanced Message Passing and Communication Mechanisms</a><span class="topic-objective">Advanced MPI; collective and non-blocking communication; optimization; communication overhead.</span></span></li>
+    <li class="topic" data-lesson="006"><span class="topic-num">06</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/006-distributed-synchronization-and-consistency.html">Distributed Synchronization and Consistency</a><span class="topic-objective">Clock synchronization; mutual exclusion; distributed coordination; consistency models.</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" data-unit="3" id="module-3">
+  <div class="unit-head"><h2>Module 3 · Advanced Parallel Processing and Optimization</h2><span class="meta">3 lectures</span><span class="bar"><i></i></span></div>
+  <ol class="topics">
+    <li class="topic" data-lesson="007"><span class="topic-num">07</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/007-advanced-parallel-algorithms-and-decomposition.html">Advanced Parallel Algorithms and Decomposition Techniques</a><span class="topic-objective">Domain/task decomposition; parallel sorting; graph processing; parallel matrix operations.</span></span></li>
+    <li class="topic" data-lesson="008"><span class="topic-num">08</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/008-load-balancing-and-dynamic-resource-scheduling.html">Load Balancing and Dynamic Resource Scheduling</a><span class="topic-objective">Static/dynamic load balancing; task scheduling; work stealing; resource allocation strategies.</span></span></li>
+    <li class="topic" data-lesson="009"><span class="topic-num">09</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/009-performance-modeling-scalability-and-optimization.html">Performance Modeling, Scalability and Optimization</a><span class="topic-objective">Strong/weak scaling; Amdahl’s &amp; Gustafson’s laws; communication-to-computation ratio; profiling; scalability limits.</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" data-unit="4" id="module-4">
+  <div class="unit-head"><h2>Module 4 · Heterogeneous and Emerging Architectures</h2><span class="meta">2 lectures</span><span class="bar"><i></i></span></div>
+  <ol class="topics">
+    <li class="topic" data-lesson="010"><span class="topic-num">10</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/010-heterogeneous-computing-cpu-gpu-accelerators.html">Heterogeneous Computing Architectures: CPU, GPU and Accelerators</a><span class="topic-objective">CPU–GPU architectures; heterogeneous memory; GPU clusters; accelerator-based and hybrid parallel designs.</span></span></li>
+    <li class="topic" data-lesson="011"><span class="topic-num">11</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/011-cloud-edge-and-serverless-distributed-computing.html">Cloud, Edge and Serverless Distributed Computing</a><span class="topic-objective">Cloud HPC; resource management; virtualization/containerization; edge computing; dynamic scaling.</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" data-unit="5" id="module-5">
+  <div class="unit-head"><h2>Module 5 · Advanced Research Topics</h2><span class="meta">2 lectures</span><span class="bar"><i></i></span></div>
+  <ol class="topics">
+    <li class="topic" data-lesson="012"><span class="topic-num">12</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/012-fault-tolerance-reliability-and-energy-efficient-computing.html">Fault Tolerance, Reliability and Energy-Efficient Computing</a><span class="topic-objective">Fault tolerance; checkpointing/recovery; resilient architectures; power-aware and energy-efficient computing.</span></span></li>
+    <li class="topic" data-lesson="013"><span class="topic-num">13</span><span class="topic-main"><span class="dot"></span><a class="topic-link" href="lessons/013-future-of-distributed-and-parallel-architectures.html">Future of Distributed and Parallel Architectures</a><span class="topic-objective">Exascale; AI-driven HPC; quantum and neuromorphic architectures; emerging research challenges.</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" id="labs">
+  <div class="unit-head"><h2>Interactive labs & demos</h2><span class="meta">Companion visuals</span></div>
+  <ol class="topics">
+    <li class="topic"><span class="topic-num">L1</span><span class="topic-main"><a class="topic-link" href="labs/scaling-laws.html">Scaling Laws Explorer</a><span class="topic-objective">Interactive Amdahl/Gustafson speedup and efficiency calculations and curves (Fundamentals, Lecture 9).</span></span></li>
+    <li class="topic"><span class="topic-num">L2</span><span class="topic-main"><a class="topic-link" href="labs/network-topologies.html">Network Topologies Visualizer</a><span class="topic-objective">Compare Mesh, Torus, Fat-Tree, and Hypercube structures and trade-offs (Lecture 3).</span></span></li>
+  </ol>
+</section>
+
+<section class="unit" id="resources">
+  <div class="unit-head"><h2>Course resources</h2><span class="meta">Documentation</span></div>
+  <div class="table-wrap"><table>
+    <tr><th>Resource</th><th>Description</th></tr>
+    <tr><td><a href="CURRICULUM.md">CURRICULUM.md</a></td><td>Modules, lecture objectives, prerequisites/fundamentals mapping, and research-activity expectations.</td></tr>
+    <tr><td><a href="README.md">README.md</a></td><td>Project overview, structure, local preview, and GitHub Pages deployment steps.</td></tr>
+    <tr><td><a href="tour.html">Tour</a></td><td>How to navigate and use the lessons, visuals, examples, checks, and research activities.</td></tr>
+  </table></div>
+</section>
+
+<div class="next"><p><strong>How to use this course.</strong> Start with Fundamentals, then follow modules in order. In each lecture, read objectives and core mechanisms, study diagrams/tables and worked examples, reflect on trade-offs/limitations and research problems, answer check-for-understanding prompts, and complete the Research Activities (papers, comparison, case study) critically.</p></div>
+</main>
+<script src="assets/course.js" defer></script>
+</body>
+</html>
