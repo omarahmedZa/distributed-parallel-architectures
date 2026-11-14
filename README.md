@@ -2,6 +2,10 @@
 
 A static, self-contained educational website for a graduate/advanced course titled **“Distributed and Parallel Architectures.”** The site teaches prerequisite fundamentals first, then covers 13 lectures across 5 modules with an emphasis on architectural design decisions, advanced mechanisms, trade-offs, scalability, and open research problems.
 
+- **Live site (GitHub Pages):** <https://omarahmedza.github.io/distributed-parallel-architectures/>
+- **Public source repository:** <https://github.com/omarahmedZa/distributed-parallel-architectures>
+- **Pages configuration:** deploy from `main`, folder `/ (root)`
+
 Modeled after the structure and visual/UX style of the reference projects:
 - `/home/stave/ai-ml-course`
 - `/home/stave/computer-vision-course`
@@ -59,15 +63,27 @@ python3 -m http.server 8000 --directory site
 
 ## GitHub Pages deployment
 
-This project is structured for **GitHub Pages deployment from the repository root** on a **public** repository (branch `main`, folder `/ (root)`), with relative internal links/asset paths and `.nojekyll` for compatibility. A reference-style `site/` publish build is also provided.
+The site is already configured for **GitHub Pages deployment from the repository root** on a **public** repository (branch `main`, folder `/ (root)`), with relative internal links/asset paths and `.nojekyll` for compatibility. A reference-style `site/` publish build is also provided.
 
-### Recommended (root deploy, public repo)
+**Current deployment:** Pages is enabled on the public repository and serving from `main` / `/ (root)`.
 
-1. **Initialize and commit (if needed):**
+To update the live site after editing source files:
+
+```bash
+cd /home/stave/distributed-parallel-architectures
+git add -A
+git commit -m "Update course content"
+git push
+```
+Pages rebuilds automatically after each push to `main`.
+
+### Fresh deployment (if recreating the repository)
+
+1. **Initialize and commit:**
    ```bash
    cd /home/stave/distributed-parallel-architectures
    git init
-   git checkout -B main
+   git branch -M main
    git add -A
    git commit -m "Initial course site"
    ```
@@ -86,7 +102,7 @@ This project is structured for **GitHub Pages deployment from the repository roo
 
 4. **Verify:** open the published URL and confirm the dashboard, fundamentals, all 13 lectures, assets/visuals, and internal navigation/links load correctly.
 
-> Note: This environment can prepare the repository contents and commits locally, but it cannot create or change repository visibility on GitHub for you. Ensure the repository is **public** (or on a plan that supports Pages for your chosen visibility) and that Pages is configured as above.
+> Note: GitHub Pages for a **private** repository depends on the GitHub plan. The current deployment uses a public repository, with Pages serving from `main` / `/ (root)`, as configured above.
 
 ### Alternative (reference-style `site/` publish)
 
