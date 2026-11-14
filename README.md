@@ -117,6 +117,10 @@ Pages rebuilds automatically after each push to `main`.
 
 3. Rebuild and republish after any source changes.
 
+## Progress-state isolation
+
+Course progress is stored under the course-specific key `dpa-course.progress.v1`, not a shared/reference key. This prevents scores from another course on the same GitHub Pages origin (for example, the AI/ML course) from showing up as this course’s progress. New visitors start at **0%**; the dashboard provides **Reset** and **Export record** controls. Lab pages are marked `data-page="lab"` and do not create lesson score chips.
+
 ## Verification performed
 
 - **Structure:** 18 HTML pages (dashboard, tour, fundamentals, 13 lectures, 2 labs) render locally and on the live site.

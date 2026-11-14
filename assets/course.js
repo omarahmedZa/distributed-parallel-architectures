@@ -1,9 +1,11 @@
-/* AI/ML in 35 topics — progress, grading, theme, dashboard.
-   No dependencies. State lives in localStorage; nothing leaves the device. */
+/* Distributed and Parallel Architectures — progress, grading, theme, dashboard.
+   No dependencies. State lives in localStorage; nothing leaves the device.
+   The storage key is course-specific so progress never leaks between courses
+   hosted on the same GitHub Pages origin (e.g. the AI/ML course). */
 (function () {
   "use strict";
 
-  var KEY = "ai35.progress.v1";
+  var KEY = "dpa-course.progress.v1";
   var store = { lessons: {}, theme: null };
 
   try {
@@ -102,6 +104,17 @@
   /* ---------- lab page (no grading, just chrome) ---------- */
   function initLab() {
     readbar();
+    var top = document.querySelector(".topline");
+    if (top && !top.querySelector("[data-theme-toggle]")) {
+      var themeBtn = document.createElement("button");
+      themeBtn.type = "button";
+      themeBtn.setAttribute("data-theme-toggle", "");
+      themeBtn.textContent = label();
+      themeBtn.addEventListener("click", function () {
+        applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
+      });
+      top.appendChild(themeBtn);
+    }
     bindTheme(document.querySelector("[data-theme-toggle]"));
 
     var id = document.body.getAttribute("data-lesson");
@@ -214,7 +227,7 @@
     var h2s = [].slice.call(document.querySelectorAll("main h2"));
     h2s.forEach(function (h2, i) {
       var text = h2.textContent.toLowerCase();
-      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1 || text.indexOf("practice") !== -1 || text.indexOf("step by step") !== -1) return;
+      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1 || text.indexOf("practice") !== -1 || text.indexOf("step by step") !== -1 || text.indexOf("learning objectives") !== -1 || text.indexOf("why this matters") !== -1 || text.indexOf("recap") !== -1 || text.indexOf("research activities") !== -1) return;
 
       /* find the last element belonging to this section */
       var node = h2.nextElementSibling;
@@ -286,6 +299,12 @@
       });
     });
 
+
+    /* Persist the lesson's real item count so the dashboard can compute
+       accurate progress instead of assuming a fixed 20 points per lesson. */
+    st.items = totalItems;
+    st.possible = totalItems * 2;
+    persist();
 
     /* step-by-step walkthrough: one sentence per click */
     var stepBoxes = [].slice.call(document.querySelectorAll(".steps"));
@@ -500,7 +519,7 @@
       top.appendChild(themeBtn);
     }
 
-    var total = 0, done = 0, points = 0, possible = 0;
+    var total = 0, done = 0, points = 0, possible = 0, started = false;
     var unitAgg = {};
 
     rows.forEach(function (row) {
@@ -515,9 +534,14 @@
 
       var items = secVals.length + quizVals.length + pracVals.length;
       var pts = secVals.concat(quizVals, pracVals).reduce(function (a, b) { return a + b; }, 0);
-      var expected = 20; /* 5 section checks + 3 questions + 2 practice, each 0–2 */
+      /* Each lesson records how many graded items it actually has. Fall back
+         to the reference defaults for pages visited before that metadata was
+         introduced. */
+      var expected = st.possible || 20;
+      var needed = st.items || 10;
+      if (items > 0) started = true;
       total++;
-      if (items >= 10) {
+      if (items >= needed) {
         done++;
         row.querySelector(".dot").className = "dot done";
       } else if (items > 0) {
@@ -581,7 +605,8 @@
       var link = target.querySelector("a.topic-link");
       if (link) {
         cont.href = link.getAttribute("href");
-        cont.textContent = next ? "Continue → " + target.querySelector(".topic-link").textContent : "Review → " + target.querySelector(".topic-link").textContent;
+        var title = target.querySelector(".topic-link").textContent;
+        cont.textContent = !started ? "Start → " + title : next ? "Continue → " + title : "Review → " + title;
       }
     }
 
@@ -622,9 +647,11 @@
         .filter(function (v) { return v != null; });
       var all = secVals.concat(quizVals, pracVals);
       var pts = all.reduce(function (a, b) { return a + b; }, 0);
-      var g = gradeOf(pts, 20);
-      var status = all.length >= 10 ? "complete" : all.length > 0 ? "in progress" : "not started";
-      lines.push("| " + id + " | " + title + " | " + pts + "/20 | " + g.pct + "% | " + g.letter + " | " + status + " |");
+      var expected = st.possible || 20;
+      var needed = st.items || 10;
+      var g = gradeOf(pts, expected);
+      var status = all.length >= needed ? "complete" : all.length > 0 ? "in progress" : "not started";
+      lines.push("| " + id + " | " + title + " | " + pts + "/" + expected + " | " + g.pct + "% | " + g.letter + " | " + status + " |");
     });
 
     var weak = rows.filter(function (row) {
