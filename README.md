@@ -117,6 +117,16 @@ Pages rebuilds automatically after each push to `main`.
 
 3. Rebuild and republish after any source changes.
 
+## Verification performed
+
+- **Structure:** 18 HTML pages (dashboard, tour, fundamentals, 13 lectures, 2 labs) render locally and on the live site.
+- **Links:** 121 internal links checked in the source and in the generated `site/` build — **0 failures**; live-site link check also passed.
+- **Lecture requirements:** all 13 lecture pages include learning objectives, architectural design decisions and trade-offs, limitations/scalability, research problems, and a Research Activities section with 2 papers, architecture comparison, and case study.
+- **Browser checks:** no console errors on sampled dashboard/lesson/lab pages; responsive layout and theme toggle verified.
+- **Accessibility/SEO:** Lighthouse reports **1.00** for Accessibility, Best Practices, and SEO on sampled pages (dashboard and lectures), after adding meta descriptions.
+- **Build:** `python3 tools/build_site.py` succeeds (`site assembled: 27 files`), including `site/.nojekyll`.
+- **Deployment:** GitHub Pages status is **built**, serving from `main` / `/ (root)` at <https://omarahmedza.github.io/distributed-parallel-architectures/>.
+
 ## Notes on content and sources
 
 - Every lecture includes objectives, core mechanisms, architectural design decisions & trade-offs, limitations/scalability, research problems, visuals/worked examples, checks, and **Research Activities** (2-paper review, comparison, case study).
