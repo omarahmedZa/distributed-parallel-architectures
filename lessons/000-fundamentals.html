@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fundamentals — Distributed and Parallel Architectures</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=2">
-<link rel="stylesheet" href="../assets/figures.css?v=2">
+<link rel="stylesheet" href="../assets/lesson.css?v=5">
+<link rel="stylesheet" href="../assets/figures.css?v=5">
 <meta name="description" content="Prerequisite fundamentals for Distributed and Parallel Architectures: parallelism, memory models, cache hierarchy, MPI/OpenMP, and speedup/efficiency.">
 </head>
 <body data-lesson="000">
@@ -67,7 +67,7 @@
     <rect x="390" y="115" width="350" height="85" rx="8" fill="var(--card)" stroke="var(--rule)"/>
     <text x="40" y="50" font-size="14" fill="var(--accent)">SISD</text><text x="40" y="75" font-size="12" fill="var(--ink-soft)">1 instruction stream · 1 data stream</text>
     <text x="410" y="50" font-size="14" fill="var(--accent)">SIMD</text><text x="410" y="75" font-size="12" fill="var(--ink-soft)">1 instruction stream · many data elements</text>
-    <text x="40" y="145" font-size="14" fill="var(--accent)">MISD</text><text x="40" y="170" font-size="12" fill="var(--ink-soft)">many instruction streams · 1 data stream (rare)</text>
+    <text x="40" y="145" font-size="14" fill="var(--accent)">MISD</text><text x="40" y="170" font-size="12" fill="var(--ink-soft)">many instruction streams · 1 data stream</text>
     <text x="410" y="145" font-size="14" fill="var(--accent)">MIMD</text><text x="410" y="170" font-size="12" fill="var(--ink-soft)">many instruction streams · many data streams</text>
   </svg>
   <figcaption>Flynn’s taxonomy separates control (instructions) from data parallelism. Real architectures often combine categories.</figcaption>
@@ -243,6 +243,6 @@ MPI_Finalize();</code></pre>
   </div>
 </div>
 </main>
-<script src="../assets/course.js?v=2" defer></script>
+<script src="../assets/course.js?v=5" defer></script>
 </body>
 </html>

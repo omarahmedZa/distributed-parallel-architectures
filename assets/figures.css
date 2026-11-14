@@ -9,12 +9,12 @@
   --sym-env: #6b4a8a;
 }
 html[data-theme="dark"] {
-  --sym-data: #a8aeb8;
+  --sym-data: #c2c9d2;
   --sym-param: #ef8d7f;
   --sym-pred: #7fc4dd;
   --sym-loss: #e0b355;
   --sym-opt: #6fd39a;
-  --sym-env: #b79bd6;
+  --sym-env: #c4a9e3;
 }
 
 /* ---------- figure shell ---------- */
@@ -211,3 +211,22 @@ html[data-theme="dark"] {
   .lab-grid { grid-template-columns: repeat(2, 1fr); }
   .lab-grid .t { white-space: normal; }
 }
+
+/* ---------- readability: SVG labels and small text ---------- */
+/* SVG text defaults to black. Without an explicit fill it would disappear
+   on dark figure cards, so inherit the theme's readable ink color instead. */
+.fig svg text:not([fill]) { fill: var(--ink); }
+.fig svg text { font-weight: 500; stroke: none; }
+
+/* Keep small diagram labels legible without changing the layout. */
+.fig svg text[font-size="9"]  { font-size: 11px; }
+.fig svg text[font-size="10"] { font-size: 11.5px; }
+.fig svg text[font-size="11"] { font-size: 12px; }
+.fig svg text[font-size="12"] { font-size: 12px; }
+.fig svg text[font-size="13"] { font-size: 13.5px; }
+.fig svg text[font-size="14"] { font-size: 14.5px; }
+.fig svg text[font-size="16"] { font-size: 16.5px; }
+
+.fig figcaption { font-size: .8rem; color: var(--ink-soft); }
+.fig-controls { font-size: .76rem; }
+.fig-controls output { font-weight: 600; }

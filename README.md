@@ -126,6 +126,7 @@ Course progress is stored under the course-specific key `dpa-course.progress.v1`
 - **Structure:** 18 HTML pages (dashboard, tour, fundamentals, 13 lectures, 2 labs) render locally and on the live site.
 - **Links:** 121 internal links checked in the source and in the generated `site/` build — **0 failures**; live-site link check also passed.
 - **Lecture requirements:** all 13 lecture pages include learning objectives, architectural design decisions and trade-offs, limitations/scalability, research problems, and a Research Activities section with 2 papers, architecture comparison, and case study.
+- **Readability/contrast:** all core light/dark theme text pairs are **≥4.5:1**; SVG text without an explicit fill now inherits the theme ink color, inherited strokes are removed from text, small diagram labels use a 500 weight and minimum sizes, and a text-overlap check across all figures found no collisions.
 - **Browser checks:** no console errors on sampled dashboard/lesson/lab pages; responsive layout and theme toggle verified.
 - **Fresh-visitor state:** starts at **0%** with a **Start** CTA; an old AI/ML-course localStorage key on the same origin does **not** affect this course; **Reset** clears the course record and **Export record** downloads a learning record.
 - **Labs:** marked `data-page="lab"`, show no lesson score chip, and include a theme toggle.

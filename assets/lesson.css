@@ -5,8 +5,8 @@
 
 :root {
   --ink: #14181d;
-  --ink-soft: #5a626d;
-  --ink-faint: #6b7480;
+  --ink-soft: #4a525d;
+  --ink-faint: #5b6470;
   --rule: #e2e6ea;
   --paper: #fdfcfa;
   --card: #ffffff;
@@ -25,9 +25,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #e9e6e0;
-    --ink-soft: #a8aeb8;
-    --ink-faint: #9aa2ad;
+    --ink: #f0ede7;
+    --ink-soft: #c2c9d2;
+    --ink-faint: #aeb7c2;
     --rule: #2b3138;
     --paper: #111418;
     --card: #171b20;
@@ -45,7 +45,7 @@
 
 html[data-theme="light"] {
   --on-accent: #ffffff;
-  --ink: #14181d; --ink-soft: #5a626d; --ink-faint: #6b7480; --rule: #e2e6ea;
+  --ink: #14181d; --ink-soft: #4a525d; --ink-faint: #5b6470; --rule: #e2e6ea;
   --paper: #fdfcfa; --card: #ffffff; --accent: #a3231f; --accent-2: #1f5f7a;
   --accent-soft: #f7ece9; --ok: #1f7a4d; --warn: #9a6b00; --bad: #a3231f;
   --code-bg: #f4f2ee;
@@ -53,7 +53,7 @@ html[data-theme="light"] {
 }
 html[data-theme="dark"] {
   --on-accent: #111418;
-  --ink: #e9e6e0; --ink-soft: #a8aeb8; --ink-faint: #9aa2ad; --rule: #2b3138;
+  --ink: #f0ede7; --ink-soft: #c2c9d2; --ink-faint: #aeb7c2; --rule: #2b3138;
   --paper: #111418; --card: #171b20; --accent: #ef8d7f; --accent-2: #7fc4dd;
   --accent-soft: #2a1d1b; --ok: #6fd39a; --warn: #e0b355; --bad: #ef8d7f;
   --code-bg: #1c2127;
@@ -85,7 +85,7 @@ main { max-width: var(--measure); margin: 0 auto; }
   border-bottom: 1px solid var(--rule);
   margin-bottom: 2.2rem;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: .7rem; letter-spacing: .09em; text-transform: uppercase;
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
 }
 .topline a { color: var(--ink-soft); text-decoration: none; white-space: nowrap; }
 .topline a:hover { color: var(--accent); }
@@ -112,7 +112,7 @@ main { max-width: var(--measure); margin: 0 auto; }
 .masthead { margin-bottom: 2.2rem; }
 .kicker {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+  font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-faint); margin: 0 0 .6rem;
 }
 h1 {
@@ -202,7 +202,7 @@ td.num, th.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospac
 
 figure { margin: 1.6rem 0; }
 figure svg { display: block; width: 100%; height: auto; }
-figcaption { font-size: .8rem; color: var(--ink-faint); margin-top: .5rem; text-align: center; }
+figcaption { font-size: .84rem; color: var(--ink-soft); margin-top: .5rem; text-align: center; }
 
 /* ---------- Quiz ---------- */
 ol.quiz { counter-reset: q; list-style: none; padding-left: 0; }
@@ -241,7 +241,7 @@ details p:last-child { margin-bottom: .2rem; }
 }
 .gbtn {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: .68rem; letter-spacing: .04em;
+  font-size: .72rem; letter-spacing: .03em;
   padding: .28rem .55rem; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--rule); background: var(--card); color: var(--ink-soft);
   transition: transform .06s ease, border-color .15s, background .15s;
@@ -257,7 +257,7 @@ details p:last-child { margin-bottom: .2rem; }
   margin: .9rem 0 0; padding: .5rem .6rem;
   border: 1px dashed var(--rule); border-radius: 6px;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: .64rem; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-faint);
+  font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft);
 }
 .blockcheck .grow { flex: 1; }
 
@@ -269,7 +269,7 @@ details p:last-child { margin-bottom: .2rem; }
   border-radius: 999px; padding: .45rem .8rem;
   box-shadow: var(--shadow);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+  font-size: .74rem; letter-spacing: .05em; text-transform: uppercase;
   color: var(--ink-soft);
 }
 .scorechip strong { color: var(--ink); font-size: .9rem; }
@@ -333,7 +333,7 @@ ol.topics > li.topic {
 .topic-link:hover { text-decoration: underline; }
 .topic-title { font-weight: 600; color: var(--ink-soft); }
 .topic-objective { display: block; font-size: .84rem; color: var(--ink-soft); line-height: 1.45; margin-top: .1rem; }
-.topic-meta { font-family: ui-monospace, monospace; font-size: .66rem; color: var(--ink-faint); white-space: nowrap; padding-top: .3rem; text-align: right; }
+.topic-meta { font-family: ui-monospace, monospace; font-size: .7rem; color: var(--ink-faint); white-space: nowrap; padding-top: .3rem; text-align: right; }
 .badge {
   display: inline-block; font-family: ui-monospace, monospace;
   font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
