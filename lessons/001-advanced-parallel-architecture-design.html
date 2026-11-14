@@ -82,13 +82,20 @@
 <h3>Worked example: throughput vs latency orientation</h3>
 <p>Assume a workload with 90% parallelizable work. Using the basic speedup intuition from Fundamentals, ideal speedup is limited by the 10% serial portion; adding many simple cores yields large gains only if that parallel portion maps efficiently (high utilization, sufficient bandwidth, low divergence). A few powerful cores may finish latency-critical serial phases faster, improving end-to-end time despite lower peak parallel throughput. This illustrates why “more cores” is not uniformly better—the right balance is workload-dependent.</p>
 
-<h2>Limitations and open research problems</h2>
+<h2>Limitations and scalability</h2>
 <ul>
   <li><strong>Memory wall and bandwidth limits:</strong> data movement energy/latency increasingly dominate compute.</li>
-  <li><strong>Coherence and interconnect scaling:</strong> maintaining shared-memory semantics at high core counts is costly (see Lecture 2, 3).</li>
+  <li><strong>Coherence and interconnect scaling:</strong> maintaining shared-memory semantics at high core counts is costly (see Lectures 2 and 3).</li>
   <li><strong>Dark silicon/power constraints:</strong> not all transistors can be active at full speed simultaneously.</li>
   <li><strong>Programmability and portability:</strong> extracting performance across heterogeneous/many-core designs remains challenging.</li>
-  <li><strong>Research directions:</strong> heterogeneous/specialized architectures, near-/in-memory processing, scalable coherence/interconnects, and architecture–software co-design.</li>
+</ul>
+
+<h2>Research problems</h2>
+<ul>
+  <li>Heterogeneous and specialized architectures that balance latency, throughput, and energy.</li>
+  <li>Near-/in-memory processing and data-centric designs that reduce data movement.</li>
+  <li>Scalable coherence/interconnect mechanisms for high core counts.</li>
+  <li>Architecture–software co-design and portable performance across diverse parallel systems.</li>
 </ul>
 
 <h2>Recap and check for understanding</h2>
