@@ -1,0 +1,6 @@
+# Generated publish directory (build with `python3 tools/build_site.py`)
+/site/
+
+# Local/editor artifacts
+__pycache__/
+.DS_Store
