@@ -127,7 +127,10 @@ Course progress is stored under the course-specific key `dpa-course.progress.v1`
 - **Links:** 121 internal links checked in the source and in the generated `site/` build — **0 failures**; live-site link check also passed.
 - **Lecture requirements:** all 13 lecture pages include learning objectives, architectural design decisions and trade-offs, limitations/scalability, research problems, and a Research Activities section with 2 papers, architecture comparison, and case study.
 - **Browser checks:** no console errors on sampled dashboard/lesson/lab pages; responsive layout and theme toggle verified.
-- **Accessibility/SEO:** Lighthouse reports **1.00** for Accessibility, Best Practices, and SEO on sampled pages (dashboard and lectures), after adding meta descriptions.
+- **Fresh-visitor state:** starts at **0%** with a **Start** CTA; an old AI/ML-course localStorage key on the same origin does **not** affect this course; **Reset** clears the course record and **Export record** downloads a learning record.
+- **Labs:** marked `data-page="lab"`, show no lesson score chip, and include a theme toggle.
+- **Citations:** all 27 DOI references were checked against Crossref; one incorrect alternate DOI was removed.
+- **Accessibility/SEO:** Lighthouse reports **1.00** for Accessibility, Best Practices, and SEO on sampled pages (dashboard and lectures).
 - **Build:** `python3 tools/build_site.py` succeeds (`site assembled: 27 files`), including `site/.nojekyll`.
 - **Deployment:** GitHub Pages status is **built**, serving from `main` / `/ (root)` at <https://omarahmedza.github.io/distributed-parallel-architectures/>.
 

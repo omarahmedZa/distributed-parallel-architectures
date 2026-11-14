@@ -108,7 +108,7 @@ MPI_Waitall(reqs);</code></pre>
   </section>
   <section class="paper">
     <h3>Literature review — Paper 2</h3>
-    <p class="citation"><span class="tag">Citation</span> T. Hoefler, P. Gottschling, A. Lumsdaine, and W. Rehm, “Optimizing a Conjugate Gradient Solver with Non-Blocking Collective Operations,” <em>Parallel Computing</em>, vol. 33, no. 9, pp. 624–633, 2007. DOI: <a href="https://doi.org/10.1016/j.parco.2007.06.006">10.1016/j.parco.2007.06.006</a> (preprint: <a href="https://doi.org/10.1007/978-3-540-74466-5_40">Euro-Par 2007 version, 10.1007/978-3-540-74466-5_40</a>).</p>
+    <p class="citation"><span class="tag">Citation</span> T. Hoefler, P. Gottschling, A. Lumsdaine, and W. Rehm, “Optimizing a Conjugate Gradient Solver with Non-Blocking Collective Operations,” <em>Parallel Computing</em>, vol. 33, no. 9, pp. 624–633, 2007. DOI: <a href="https://doi.org/10.1016/j.parco.2007.06.006">10.1016/j.parco.2007.06.006</a>.</p>
     <p><strong>Core contribution:</strong> Shows how non-blocking collective operations can overlap communication with computation in iterative solvers to improve performance.</p>
     <p><strong>Method/architecture:</strong> Reformulates/structures communication in a conjugate gradient method to use non-blocking collectives and evaluates overlap benefits.</p>
     <p><strong>Key results:</strong> Demonstrates measurable speedups when communication can be effectively overlapped with independent computation, motivating asynchronous collective interfaces.</p>
