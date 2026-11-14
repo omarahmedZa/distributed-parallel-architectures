@@ -171,14 +171,17 @@
     /* top bar */
     var top = document.querySelector(".topline");
     if (top) {
-      var themeBtn = document.createElement("button");
-      themeBtn.type = "button";
-      themeBtn.setAttribute("data-theme-toggle", "");
-      themeBtn.textContent = label();
-      themeBtn.addEventListener("click", function () {
-        applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
-      });
-      top.appendChild(themeBtn);
+      var themeBtn = top.querySelector("[data-theme-toggle]");
+      if (!themeBtn) {
+        themeBtn = document.createElement("button");
+        themeBtn.type = "button";
+        themeBtn.setAttribute("data-theme-toggle", "");
+        themeBtn.textContent = label();
+        themeBtn.addEventListener("click", function () {
+          applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
+        });
+        top.appendChild(themeBtn);
+      }
       var pill = document.createElement("span");
       pill.className = "pill hide-sm";
       pill.setAttribute("data-score-pill", "");
@@ -486,7 +489,7 @@
     readbar();
 
     var top = document.querySelector(".topline");
-    if (top) {
+    if (top && !top.querySelector("[data-theme-toggle]")) {
       var themeBtn = document.createElement("button");
       themeBtn.type = "button";
       themeBtn.setAttribute("data-theme-toggle", "");
